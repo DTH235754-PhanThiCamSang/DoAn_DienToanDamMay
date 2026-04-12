@@ -1,0 +1,108 @@
+<%- include('navbar') %>
+    <div class="container mt-4">
+        <div class="card col-md-8 mx-auto shadow border-0">
+            <div class="card-header bg-warning text-dark fw-bold">
+                <i class="bi bi-pencil-square"></i> CẬP NHẬT THÔNG TIN ĐIỆN THOẠI
+            </div>
+            <div class="card-body">
+                <form action="/dienthoai/sua/<%= dt._id %>" method="POST">
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Tên điện thoại</label>
+                            <input type="text" name="TenDT" class="form-control border-primary" value="<%= dt.TenDT %>" required>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Hãng sản xuất</label>
+                            <select name="HangSanXuat" class="form-select" required>
+                                <% hang.forEach(h => { %>
+                                    <option value="<%= h._id %>" <%= (dt.HangSanXuat && dt.HangSanXuat._id.toString() === h._id.toString()) ? 'selected' : '' %>>
+                                        <%= h.TenHang %>
+                                    </option>
+                                <% }) %>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row bg-light p-3 rounded mb-3 border">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Giá bán tham khảo (VND)</label>
+                                <input type="text" id="GiaBan" class="form-control text-danger fw-bold" readonly placeholder="Tự động tính toán">
+                                <small class="text-muted">Giá của phiên bản đầu tiên</small>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Giá nhập (VND)</label>
+                                <input type="number" id="GiaNhap" name="GiaNhap" class="form-control" value="<%= dt.GiaNhap %>" required>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <% 
+                                let phanTramLoi_DaiDien = (dt.CacPhienBan && dt.CacPhienBan.length > 0) ? dt.CacPhienBan[0].PhanTramLoi : 10;
+                                let phanTramGiam_DaiDien = (dt.CacPhienBan && dt.CacPhienBan.length > 0) ? dt.CacPhienBan[0].PhanTramGiamGia : 0;
+                            %>
+                            
+                            <div class="mb-3">
+                                <label class="form-label text-danger fw-bold">Khuyến mãi / Giảm giá (%)</label>
+                                <input type="number" id="PhanTramGiamGia" name="PhanTramGiamGia" class="form-control" value="<%= phanTramGiam_DaiDien %>" min="0" max="100">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Lợi nhuận mong muốn (%)</label>
+                                <input type="number" id="PhanTramLoi" name="PhanTramLoi" class="form-control" value="<%= phanTramLoi_DaiDien %>" min="0">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Mô tả sản phẩm</label>
+                        <textarea name="MoTa" class="form-control" rows="4" required><%= dt.MoTa %></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Đường dẫn hình ảnh (URL)</label>
+                        <input type="text" name="HinhAnh" class="form-control" value="<%= dt.HinhAnh %>">
+                        <% if(dt.HinhAnh) { %>
+                            <div class="mt-2 text-center">
+                                <img src="<%= dt.HinhAnh %>" alt="Preview" class="img-thumbnail" style="max-height: 100px;">
+                            </div>
+                        <% } %>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-primary px-5 fw-bold"><i class="bi bi-save"></i> Lưu thay đổi</button>
+                        <a href="/dienthoai" class="btn btn-secondary px-4"><i class="bi bi-arrow-left"></i> Quay lại</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const inputGiaNhap = document.getElementById('GiaNhap');
+        const inputLoi = document.getElementById('PhanTramLoi');
+        const inputGiam = document.getElementById('PhanTramGiamGia');
+        const inputGiaBan = document.getElementById('GiaBan');
+
+        function tinhGiaBan() {
+            let giaNhap = parseFloat(inputGiaNhap.value) || 0;
+            let phanTramLoi = parseFloat(inputLoi.value) || 0;
+            let phanTramGiam = parseFloat(inputGiam.value) || 0;
+
+            let giaNiemYet = giaNhap * (1 + phanTramLoi / 100);
+            let giaCuoi = giaNiemYet * (1 - phanTramGiam / 100);
+            let giaLamTron = Math.round(giaCuoi / 10) * 10;
+
+            // Hiển thị định dạng tiền tệ cho đẹp mắt
+            inputGiaBan.value = giaLamTron.toLocaleString('vi-VN') + ' VNĐ';
+        }
+
+        // Lắng nghe sự kiện gõ phím
+        [inputGiaNhap, inputLoi, inputGiam].forEach(el => {
+            if(el) el.addEventListener('input', tinhGiaBan);
+        });
+
+        // Tự động tính toán lần đầu khi vừa mở trang Sửa
+        window.addEventListener('DOMContentLoaded', tinhGiaBan);
+    </script>

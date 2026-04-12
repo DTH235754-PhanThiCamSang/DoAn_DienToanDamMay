@@ -1,0 +1,59 @@
+<%- include('navbar') %>
+    <div class="container mt-4">
+        <div class="card col-md-6 mx-auto shadow border-0">
+            <div class="card-header bg-primary text-white fw-bold">LẬP PHIẾU NHẬP HÀNG MỚI</div>
+            <div class="card-body">
+                <form action="/phieunhap/them" method="POST">
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Tên điện thoại</label>
+                        <select id="selectPhone" name="MaDienThoai" class="form-select border-primary" required
+                            onchange="updatePrice()">
+                            <option value="" data-price="0">-- Chọn điện thoại đã có --</option>
+                            <% dienthoai.forEach(dt=> { %>
+                                <option value="<%= dt._id %>" data-price="<%= dt.GiaNhap %>">
+                                    <%= dt.TenDT %>
+                                </option>
+                                <% }) %>
+                        </select>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="form-label fw-bold">Số lượng nhập</label>
+                            <input type="number" name="SoLuongNhap" class="form-control" min="1" value="1" required>
+                        </div>
+
+                        <div class="col-6 mb-3">
+                            <label class="form-label fw-bold">Giá nhập (VND)</label>
+                            <input type="number" id="inputGiaNhap" name="GiaNhapVao"
+                                class="form-control text-danger fw-bold" required>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-3">
+                        <button type="submit" class="btn btn-primary px-5 fw-bold">Xác nhận nhập kho</button>
+                        <a href="/dienthoai" class="btn btn-danger">Hủy</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updatePrice() {
+            var select = document.getElementById("selectPhone");
+            var selectedOption = select.options[select.selectedIndex];
+
+            // Lấy giá từ data-price của option được chọn
+            var price = selectedOption.getAttribute("data-price");
+
+            // Điền vào ô input Giá nhập
+            var priceInput = document.getElementById("inputGiaNhap");
+            priceInput.value = price;
+
+            // Hiệu ứng nhỏ: Nháy màu để người dùng biết giá đã thay đổi
+            priceInput.style.backgroundColor = "#fff3cd";
+            setTimeout(() => { priceInput.style.backgroundColor = "#fff"; }, 500);
+        }
+    </script>

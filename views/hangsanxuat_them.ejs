@@ -1,0 +1,25 @@
+<%- include('navbar') %>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0 text-center">THÊM HÃNG SẢN XUẤT MỚI</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form action="/hangsanxuat/them" method="POST">
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Tên hãng</label>
+                            <input type="text" name="TenHang" class="form-control" placeholder="Ví dụ: Apple, Samsung..." required>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success">Lưu dữ liệu</button>
+                            <a href="/hangsanxuat" class="btn btn-danger">Hủy</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<%- include('footer') %>

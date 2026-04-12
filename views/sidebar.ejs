@@ -1,0 +1,40 @@
+<!-- <div class="list-group list-group-flush rounded shadow-sm">
+    <div class="bg-dark text-white text-center py-3 fw-bold rounded-top">
+        <i class="bi bi-shield-lock"></i> ADMIN PANEL
+    </div>
+    
+    <a href="/dienthoai" class=" list-group-item list-group-item-action py-3 fw-bold <%= typeof active !== 'undefined' && active === 'sanpham' ? 'bg-primary text-white' : 'text-dark' %>">
+        <i class="bi bi-phone me-2"></i> Quản lý Sản phẩm
+    </a>
+    
+    <a href="/hangsanxuat" class="list-group-item list-group-item-action py-3 fw-bold <%= typeof active !== 'undefined' && active === 'hangsanxuat' ? 'bg-primary text-white' : 'text-dark' %>">
+        <i class="bi bi-tags me-2"></i> Quản lý Hãng sản xuất
+    </a>
+
+    <a href="/" class="list-group-item list-group-item-action py-3 fw-bold text-danger">
+        <i class="bi bi-house me-2"></i> Về Trang Chủ
+    </a>
+</div> -->
+<div class="list-group list-group-flush rounded shadow-sm bg-white">
+    <div class="bg-dark text-white text-center py-3 fw-bold rounded-top">
+        <i class="bi bi-shield-lock me-2"></i> ADMIN PANEL
+    </div>
+    
+    <a href="/dienthoai" class="list-group-item list-group-item-action py-3 fw-bold <%= typeof active !== 'undefined' && active === 'sanpham' ? 'active' : 'text-dark' %>">
+        <i class="bi bi-phone me-2"></i> Quản lý Sản phẩm
+    </a>
+    <a href="/hangsanxuat" class="list-group-item list-group-item-action py-3 fw-bold <%= typeof active !== 'undefined' && active === 'hangsanxuat' ? 'active' : 'text-dark' %>">
+        <i class="bi bi-tags me-2"></i> Quản lý Hãng sản xuất
+    </a>
+    <a href="/phieunhap" class="list-group-item list-group-item-action py-3 fw-bold <%= typeof active !== 'undefined' && active === 'phieunhap' ? 'active' : 'text-dark' %>">
+        <i class="bi bi-file-earmark-arrow-down me-2"></i> Quản lý Phiếu nhập
+    </a>
+    <a href="/taikhoan" class="list-group-item list-group-item-action py-3 fw-bold <%= typeof active !== 'undefined' && active === 'taikhoan' ? 'active' : 'text-dark' %>">
+        <i class="bi bi-person-circle me-2"></i> Quản lý Tài khoản
+    </a>
+    <hr class="my-0">
+
+    <a href="/" class="list-group-item list-group-item-action py-3 fw-bold text-danger rounded-bottom">
+        <i class="bi bi-house me-2"></i> Về Trang Chủ
+    </a>
+</div>

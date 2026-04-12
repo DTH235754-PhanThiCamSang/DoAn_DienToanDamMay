@@ -1,0 +1,168 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm rounded mb-3 mt-3">
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+	<div class="container-fluid">
+		<a class="navbar-brand fw-bold" href="/">
+			<i class="bi bi-phone-vibrate"></i> SPhone Store
+		</a>
+
+		<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+			aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+
+		<div class="collapse navbar-collapse" id="navbarSupportedContent">
+			<ul class="navbar-nav me-auto mb-2 mb-lg-0">
+				<li class="nav-item">
+					<a class="nav-link active" aria-current="page" href="/"><i class="bi bi-house-door"></i> Trang
+						chủ</a>
+				</li>
+
+				<% if (typeof session !=='undefined' && session.MaNguoiDung) { %>
+					<li class="nav-item dropdown">
+						<a class="nav-link dropdown-toggle text-white fw-bold" href="#" id="navbarDropdown"
+							role="button" data-bs-toggle="dropdown" aria-expanded="false">
+							<i class="bi bi-grid-fill me-1"></i> Quản lý
+						</a>
+						<ul class="dropdown-menu shadow border-0" aria-labelledby="navbarDropdown">
+							<li>
+								<a class="dropdown-item py-2" href="/dienthoai">
+									<i class="bi bi-phone me-2 text-success"></i> Quản lý sản phẩm
+								</a>
+							</li>
+
+							<li>
+								<a class="dropdown-item py-2" href="/hangsanxuat">
+									<i class="bi bi-building me-2 text-primary"></i> Quản lý hãng sản xuất
+								</a>
+
+							</li>
+
+							<li>
+								<a class="dropdown-item py-2" href="/phieunhap">
+									<i class="bi bi-file-earmark-arrow-down me-2 text-warning"></i> Quản lý phiếu nhập
+								</a>
+							</li>
+
+							<li>
+								<hr class="dropdown-divider">
+							</li>
+
+							<li>
+								<a class="dropdown-item py-2" href="/taikhoan">
+									<i class="bi bi-person-circle me-2 text-danger"></i> Quản lý tài khoản
+								</a>
+							</li>
+						</ul>
+					</li>
+					<% } %>
+			</ul>
+			<!-- tìm kiếm -->
+			<form action="/timkiem" method="GET" class="d-flex position-relative mx-auto" style="width: 350px;">
+				<div class="input-group">
+					<input class="form-control" type="search" name="q" id="searchInput"
+						placeholder="Tìm kiếm điện thoại..." autocomplete="off" required>
+					<button class="btn btn-warning" type="submit"><i class="bi bi-search"></i></button>
+				</div>
+
+				<div id="searchResults" class="dropdown-menu w-100 shadow-sm mt-1"
+					style="display: none; position: absolute; top: 100%; left: 0; z-index: 1050; max-height: 400px; overflow-y: auto;">
+				</div>
+			</form>
+			
+			<ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+				<% if (typeof session !=='undefined' && session.MaNguoiDung) { %>
+					<li class="nav-item dropdown">
+						<a class="nav-link dropdown-toggle fw-bold text-warning" href="#" id="userDropdown"
+							role="button" data-bs-toggle="dropdown" aria-expanded="false">
+							<i class="bi bi-person-circle"></i>
+							<%= session.HoVaTen %>
+						</a>
+						<ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userDropdown">
+							<li><a class="dropdown-item" href="/taikhoan/doimatkhau"><i class="bi bi-key"></i> Đổi mật
+									khẩu</a></li>
+							<li>
+								<hr class="dropdown-divider">
+							</li>
+							<li><a class="dropdown-item text-danger" href="/dangxuat"><i
+										class="bi bi-box-arrow-right"></i> Đăng xuất</a></li>
+						</ul>
+					</li>
+					<% } else { %>
+						<li class="nav-item">
+							<a class="nav-link" href="/dangnhap"><i class="bi bi-box-arrow-in-right"></i> Đăng nhập</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link" href="/dangky"><i class="bi bi-person-plus"></i> Đăng ký</a>
+						</li>
+						<% } %>
+			</ul>
+		</div>
+	</div>
+</nav>
+
+<% if (typeof errorMessage !=='undefined' && errorMessage) { %>
+	<div class="alert alert-danger alert-dismissible fade show mt-2 shadow-sm" role="alert">
+		<i class="bi bi-exclamation-triangle-fill"></i>
+		<%= errorMessage %>
+			<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+	</div>
+	<% } %>
+
+		<% if (typeof successMessage !=='undefined' && successMessage) { %>
+			<div class="alert alert-success alert-dismissible fade show mt-2 shadow-sm" role="alert">
+				<i class="bi bi-check-circle-fill"></i>
+				<%= successMessage %>
+					<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+			</div>
+
+			<% } %>
+				<script>
+					const searchInput = document.getElementById('searchInput');
+					const searchResults = document.getElementById('searchResults');
+					let debounceTimer;
+
+					// Khi người dùng gõ phím
+					searchInput.addEventListener('input', function () {
+						clearTimeout(debounceTimer);
+						const query = this.value.trim();
+
+						// Nếu gõ ít hơn 2 chữ thì ẩn đi
+						if (query.length < 2) {
+							searchResults.style.display = 'none';
+							return;
+						}
+
+						// Chờ 300ms sau khi ngừng gõ mới gọi Server (chống lag)
+						debounceTimer = setTimeout(() => {
+							fetch(`/api/timkiem?q=${encodeURIComponent(query)}`)
+								.then(res => res.json())
+								.then(data => {
+									if (data.length > 0) {
+										// Tạo danh sách sản phẩm xổ xuống
+										searchResults.innerHTML = data.map(sp => `
+                            <a class="dropdown-item d-flex align-items-center py-2 border-bottom" href="/dienthoai/chitiet/${sp._id}">
+                                <img src="${sp.HinhAnh}" alt="${sp.TenDT}" style="width: 40px; height: 40px; object-fit: contain; margin-right: 10px;">
+                                <div class="text-truncate">
+                                    <div class="fw-bold text-dark" style="font-size: 14px;">${sp.TenDT}</div>
+                                    <small class="text-danger fw-bold">${sp.GiaNhap.toLocaleString('vi-VN')}đ</small>
+                                </div>
+                            </a>
+                        `).join('');
+									} else {
+										searchResults.innerHTML = '<span class="dropdown-item text-muted text-center py-2">Không tìm thấy sản phẩm nào!</span>';
+									}
+									searchResults.style.display = 'block'; // Hiện khung kết quả
+								})
+								.catch(err => console.error("Lỗi tìm kiếm:", err));
+						}, 300);
+					});
+
+					// Ẩn khung kết quả khi click chuột ra ngoài
+					document.addEventListener('click', function (e) {
+						if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+							searchResults.style.display = 'none';
+						}
+					});
+				</script>
+				<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

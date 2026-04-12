@@ -1,0 +1,209 @@
+<%- include('navbar') %>
+
+<script id="data-phienban" type="application/json">
+    <%- JSON.stringify(dienthoai.CacPhienBan || []) %>
+</script>
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-5">
+            <div class="text-center mb-4 card shadow-sm p-3">
+                <img src="<%= dienthoai.HinhAnh %>" class="img-fluid rounded" alt="Product">
+            </div>
+
+            <div class="card shadow-sm p-3">
+                <h5 class="fw-bold border-bottom pb-2">Mô tả chi tiết:</h5>
+                <div id="descriptionContent" class="description-collapsed">
+                    <%- dienthoai.MoTa %>
+                </div>
+                <button id="btnToggleDesc" class="btn btn-link p-0 text-decoration-none mt-2">Xem thêm ▼</button>
+            </div>
+        </div>
+
+        <div class="col-md-7 px-4">
+            <h1 class="fw-bold" id="productTitle"><%= dienthoai.TenDT %></h1>
+            <p class="text-muted">Hãng: <strong><%= dienthoai.HangSanXuat ? dienthoai.HangSanXuat.TenHang : 'Chưa cập nhật' %></strong></p>
+
+            <div id="priceArea">
+                <h3 class="text-danger fw-bold my-3" id="hienThiGia">Đang tính toán giá...</h3>
+                <p id="giaGocArea" class="text-decoration-line-through text-muted small mb-3" style="display:none;"></p>
+            </div>
+
+            <div class="mb-4">
+                <label class="fw-bold small d-block mb-2">Chọn dung lượng:</label>
+                <div class="d-flex gap-2" id="dungLuongGroup">
+                    <% 
+                        let dsDL = [...new Set((dienthoai.CacPhienBan || []).map(p => p.DungLuong))];
+                        dsDL.forEach((dl, index) => { 
+                    %>
+                        <button class="btn <%= index === 0 ? 'btn-primary' : 'btn-outline-primary' %> px-4 variant-btn"
+                                data-type="dungluong" data-value="<%= dl %>">
+                            <%= dl %>
+                        </button>
+                    <% }) %>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="fw-bold small d-block mb-2">Chọn màu:</label>
+                <div class="d-flex gap-2" id="mauSacGroup">
+                    <% 
+                        let dsMau = [...new Set((dienthoai.CacPhienBan || []).map(p => p.MauSac))];
+                        dsMau.forEach((mau, index) => { 
+                    %>
+                        <button class="btn btn-light border rounded-pill px-3 py-1 variant-btn <%= index === 0 ? 'border-primary border-2 fw-bold text-primary' : '' %>"
+                                data-type="mausac" data-value="<%= mau %>">
+                            <%= mau %>
+                        </button>
+                    <% }) %>
+                </div>
+            </div>
+
+            <hr>
+            
+            <div class="d-flex gap-2 mt-4">
+                <button id="btnMuaNgay" class="btn btn-danger btn-lg flex-fill fw-bold py-3">
+                    MUA NGAY
+                </button>
+                <button id="btnThemVaoGio" class="btn btn-outline-primary btn-lg flex-fill fw-bold py-3">
+                    THÊM VÀO GIỎ HÀNG
+                </button>
+            </div>
+
+            <div class="mt-3">
+                <a href="/" class="btn btn-light w-100 border">Quay lại trang chủ</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .description-collapsed { max-height: 250px; overflow: hidden; position: relative; transition: max-height 0.4s ease; }
+    .description-collapsed::after { content: ""; position: absolute; bottom: 0; left: 0; width: 100%; height: 60px; background: linear-gradient(transparent, white); }
+    .description-expanded { max-height: 5000px; }
+    .description-expanded::after { display: none; }
+</style>
+
+<script>
+    // 1. XỬ LÝ GẬP/MỞ MÔ TẢ
+    document.getElementById('btnToggleDesc').addEventListener('click', function () {
+        const desc = document.getElementById('descriptionContent');
+        if (desc.classList.contains('description-collapsed')) {
+            desc.classList.replace('description-collapsed', 'description-expanded');
+            this.innerText = 'Thu gọn ▲';
+        } else {
+            desc.classList.replace('description-expanded', 'description-collapsed');
+            this.innerText = 'Xem thêm ▼';
+        }
+    });
+
+    // 2. XỬ LÝ BIẾN THỂ, TÍNH GIÁ & ĐỔI TÊN
+    const cacPhienBan = JSON.parse(document.getElementById('data-phienban').textContent);
+   
+const giaNhap = Number("<%= dienthoai.GiaNhap || 0 %>"); 
+const tenGoc = "<%= dienthoai.TenDT || '' %>";
+    
+    let selectedDungLuong = "";
+    let selectedMauSac = "";
+    let idPhienBanHienTai = "";
+
+    // Hàm làm tròn đến hàng chục (12.345 -> 12.350)
+    function lamTronChuc(num) {
+        return Math.round(num / 10) * 10;
+    }
+
+    if (cacPhienBan.length > 0) {
+        selectedDungLuong = document.querySelector('#dungLuongGroup .variant-btn.btn-primary').getAttribute('data-value').trim();
+        selectedMauSac = document.querySelector('#mauSacGroup .variant-btn.border-primary').getAttribute('data-value').trim();
+
+        function updateUI() {
+            const phienBan = cacPhienBan.find(pb => 
+                pb.DungLuong.trim() === selectedDungLuong && pb.MauSac.trim() === selectedMauSac
+            );
+
+            const titleElement = document.getElementById('productTitle');
+            const priceElement = document.getElementById('hienThiGia');
+            const giaGocArea = document.getElementById('giaGocArea');
+            const btnMua = document.getElementById('btnMuaNgay');
+            const btnThem = document.getElementById('btnThemVaoGio');
+
+            if (phienBan) {
+                // A. Đổi tên sản phẩm theo cấu hình
+                titleElement.innerText = `${tenGoc} ${selectedDungLuong} - ${selectedMauSac}`;
+
+                // B. Tính toán giá (Làm tròn hàng chục)
+                // 1. Giá niêm yết = Giá nhập + % lời
+                let phanTramLoi = phienBan.PhanTramLoi || 0;
+                let giaNiemYet = lamTronChuc(giaNhap * (1 + phanTramLoi / 100));
+
+                // 2. Giá cuối = Giá niêm yết - % giảm giá
+                let phanTramGiam = phienBan.PhanTramGiamGia || 0;
+                let giaCuoi = lamTronChuc(giaNiemYet * (1 - phanTramGiam / 100));
+
+                // C. Hiển thị lên giao diện
+                priceElement.innerText = giaCuoi.toLocaleString('vi-VN') + ' VNĐ';
+                priceElement.className = "text-danger fw-bold my-3";
+
+                if(phanTramGiam > 0) {
+                    giaGocArea.innerText = "Giá cũ: " + giaNiemYet.toLocaleString('vi-VN') + " VNĐ";
+                    giaGocArea.style.display = "block";
+                    priceElement.innerHTML += ` <span class="badge bg-warning text-dark fs-6 ms-2">-${phanTramGiam}%</span>`;
+                } else {
+                    giaGocArea.style.display = "none";
+                }
+
+                btnMua.disabled = false; btnMua.innerText = "MUA NGAY";
+                btnThem.disabled = false;
+                idPhienBanHienTai = phienBan._id;
+            } else {
+                titleElement.innerText = tenGoc;
+                priceElement.innerText = 'Tạm hết hàng';
+                priceElement.className = "text-muted my-3";
+                giaGocArea.style.display = "none";
+                btnMua.disabled = true; btnMua.innerText = "HẾT HÀNG";
+                btnThem.disabled = true;
+                idPhienBanHienTai = "";
+            }
+        }
+
+        document.querySelectorAll('.variant-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const type = this.getAttribute('data-type');
+                const value = this.getAttribute('data-value');
+
+                if (type === 'dungluong') {
+                    document.querySelectorAll('#dungLuongGroup .variant-btn').forEach(b => b.classList.replace('btn-primary', 'btn-outline-primary'));
+                    this.classList.replace('btn-outline-primary', 'btn-primary');
+                    selectedDungLuong = value.trim();
+                } else {
+                    document.querySelectorAll('#mauSacGroup .variant-btn').forEach(b => b.classList.remove('border-primary', 'border-2', 'fw-bold', 'text-primary'));
+                    this.classList.add('border-primary', 'border-2', 'fw-bold', 'text-primary');
+                    selectedMauSac = value.trim();
+                }
+                updateUI();
+            });
+        });
+
+        // 3. XỬ LÝ MUA HÀNG & GIỎ HÀNG
+        const handleCartAction = (action) => {
+            if(!idPhienBanHienTai) return;
+            
+            // Link này Sáng thay đổi theo Router của Sáng (VD: /gio-hang/them/...)
+            const targetUrl = `/giohang/them/${idPhienBanHienTai}?soluong=1`;
+            
+            if(action === 'BUY') {
+                // Mua ngay thì nhảy thẳng qua trang thanh toán hoặc giỏ hàng
+                window.location.href = targetUrl + "&action=checkout";
+            } else {
+                // Thêm vào giỏ thì báo thành công (có thể dùng AJAX/fetch sau này)
+                alert(`Đã thêm vào giỏ hàng: \n${document.getElementById('productTitle').innerText}`);
+                // window.location.href = targetUrl;
+            }
+        };
+
+        document.getElementById('btnMuaNgay').onclick = () => handleCartAction('BUY');
+        document.getElementById('btnThemVaoGio').onclick = () => handleCartAction('ADD');
+
+        updateUI(); // Khởi tạo lần đầu
+    }
+</script>

@@ -1,0 +1,126 @@
+<%- include('navbar') %>
+    <div class="container mt-4">
+        <div class="card col-md-8 mx-auto shadow border-0">
+            <div class="card-header bg-primary text-white">THÊM ĐIỆN THOẠI MỚI</div>
+            <div class="card-body">
+                <form action="/dienthoai/them" method="POST">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Tên điện thoại</label>
+                            <select id="selectPhone" name="TenDienThoai" class="form-select border-primary" required
+                                onchange="autoFillData()">
+                                <option value="" data-gianhap="0" data-giaban="0">-- Chọn sản phẩm --</option>
+
+                                <% if (dienthoai && dienthoai.length> 0) { %>
+                                    <% dienthoai.forEach(dt=> { %>
+                                        <option value="<%= dt.TenDienThoai %>" data-gianhap="<%= dt.GiaNhapVao %>">
+                                            <%= dt.TenDienThoai %>
+                                        </option>
+                                        <% }) %>
+                                            <% } %>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Hãng sản xuất</label>
+                            <select name="MaHang" class="form-select" required>
+                                <% hang.forEach(h=> { %>
+                                    <option value="<%= h._id %>">
+                                        <%= h.TenHang %>
+                                    </option>
+                                    <% }) %>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+    <div class="col-md-6">
+        <div class="mb-3">
+            <label class="form-label">Giá bán (VND)</label>
+            <input type="number" id="GiaBan" name="GiaBan" class="form-control" readonly>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Giá nhập (VND)</label>
+            <input type="number" id="GiaNhap" name="GiaNhap" class="form-control" placeholder="Nhập giá nhập hàng">
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="mb-3">
+            <label class="form-label text-danger fw-bold">Khuyến mãi / Giảm giá (%)</label>
+            <input type="number" id="PhanTramGiamGia" name="PhanTramGiamGia" class="form-control" value="0">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Lợi nhuận mong muốn (%)</label>
+            <input type="number" id="PhanTramLoi" name="PhanTramLoi" class="form-control" value="10">
+        </div>
+    </div>
+</div>
+
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Mô tả sản phẩm</label>
+                        <textarea name="MoTa" class="form-control" rows="3"
+                            placeholder="Nhập mô tả ngắn gọn về sản phẩm..." required></textarea>
+                    </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Link hình ảnh</label>
+                <input type="text" name="HinhAnh" class="form-control" placeholder="Dán link ảnh từ Google vào đây">
+            </div>
+            <div class="text-center">
+                <button type="submit" class="btn btn-primary px-5">Lưu sản phẩm</button>
+                <a href="/dienthoai" class="btn btn-danger">Hủy</a>
+            </div>
+            </form>
+        </div>
+    </div>
+    </div>
+
+
+    <script>
+   
+
+    const inputGiaNhap = document.getElementById('GiaNhap'); // ID ô giá nhập
+    const inputLoi = document.getElementById('PhanTramLoi');
+    const inputGiam = document.getElementById('PhanTramGiamGia');
+    const inputGiaBan = document.getElementById('GiaBan'); // ID ô giá bán
+
+    function tinhGiaBan() {
+        let giaNhap = parseFloat(inputGiaNhap.value) || 0;
+        let phanTramLoi = parseFloat(inputLoi.value) || 0;
+        let phanTramGiam = parseFloat(inputGiam.value) || 0;
+
+        // 1. Tính giá niêm yết (Giá nhập + lời)
+        let giaNiemYet = giaNhap * (1 + phanTramLoi / 100);
+        
+        // 2. Tính giá bán cuối (Niêm yết - giảm giá)
+        let giaCuoi = giaNiemYet * (1 - phanTramGiam / 100);
+
+        // 3. Làm tròn đến hàng chục (Theo ý Sáng)
+        let giaLamTron = Math.round(giaCuoi / 10) * 10;
+
+        // Đổ vào ô Giá bán
+        inputGiaBan.value = giaLamTron;
+    }
+
+    // Lắng nghe sự kiện khi Sáng gõ phím vào 3 ô này
+    [inputGiaNhap, inputLoi, inputGiam].forEach(el => {
+        el.addEventListener('input', tinhGiaBan);
+    });
+      function autoFillData() {
+    const select = document.getElementById('selectPhone');
+    // Lấy cái option mà Sáng vừa click chọn
+    const selectedOption = select.options[select.selectedIndex];
+    
+    // Lấy cái giá nhập từ thuộc tính data-gianhap mà Sáng đã đặt ở trên
+    const giaNhapVao = selectedOption.getAttribute('data-gianhap') || 0;
+    
+    // Đổ nó vào ô nhập "Giá nhập"
+    inputGiaNhap.value = giaNhapVao;
+
+    // Sau khi có giá nhập rồi, gọi ngay hàm tính giá bán để nó nhảy số luôn
+    tinhGiaBan();
+}   
+</script>

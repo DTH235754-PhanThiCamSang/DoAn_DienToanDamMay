@@ -1,0 +1,25 @@
+<%- include('navbar') %>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-primary text-white text-center">
+                    <h5 class="mb-0">CẬP NHẬT HÃNG SẢN XUẤT</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form action="/hangsanxuat/sua/<%= hang._id %>" method="POST">
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Tên hãng hiện tại</label>
+                            <input type="text" name="TenHang" class="form-control" value="<%= hang.TenHang %>" required>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Cập nhật ngay</button>
+                            <a href="/hangsanxuat" class="btn btn-outline-secondary">Quay về</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<%- include('footer') %>
