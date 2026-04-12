@@ -16,10 +16,8 @@ var dienthoaiRouter = require('./routers/dienthoai');     // Router mới
 var phieunhapRouter = require('./routers/phieunhap');
 
 // 2. Kết nối cơ sở dữ liệu MongoDB Atlas
-// Khi deploy lên Render, hãy thêm biến môi trường MONGODB_URI trong phần Environment
-// var uri = process.env.MONGODB_URI || 'mongodb+srv://admin:admin123@cluster1.jxjblx7.mongodb.net/?appName=Cluster1';
-// var uri = "mongodb+srv://admin:123456@cluster1.jxjblx7.mongodb.net/CH_DienThoai?retryWrites=true&w=majority";
-var uri = 'mongodb://admin:admin123@ac-aon9t0v-shard-00-01.jxjblx7.mongodb.net:27017/CH_DienThoai?ssl=true&authSource=admin';
+const uri = process.env.MONGODB_URI || 'mongodb://admin:admin123@ac-aon9t0v-shard-00-01.jxjblx7.mongodb.net:27017/CH_DienThoai?ssl=true&authSource=admin';
+//var uri = 'mongodb://admin:admin123@ac-aon9t0v-shard-00-01.jxjblx7.mongodb.net:27017/CH_DienThoai?ssl=true&authSource=admin';
 mongoose.connect(uri)
 	.then(() => console.log('Kết nối MongoDB thành công!'))
 	.catch(err => console.log('Lỗi kết nối MongoDB: ' + err));
