@@ -18,7 +18,8 @@
 						chủ</a>
 				</li>
 
-				<% if (typeof session !=='undefined' && session.MaNguoiDung) { %>
+				<% // Sửa lại điều kiện: Vừa phải đăng nhập, VỪA phải có Quyen là 1 (Admin) if (typeof session
+					!=='undefined' && session.MaNguoiDung && session.QuyenHan==='admin') { %>
 					<li class="nav-item dropdown">
 						<a class="nav-link dropdown-toggle text-white fw-bold" href="#" id="navbarDropdown"
 							role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -30,24 +31,19 @@
 									<i class="bi bi-phone me-2 text-success"></i> Quản lý sản phẩm
 								</a>
 							</li>
-
 							<li>
 								<a class="dropdown-item py-2" href="/hangsanxuat">
 									<i class="bi bi-building me-2 text-primary"></i> Quản lý hãng sản xuất
 								</a>
-
 							</li>
-
 							<li>
 								<a class="dropdown-item py-2" href="/phieunhap">
 									<i class="bi bi-file-earmark-arrow-down me-2 text-warning"></i> Quản lý phiếu nhập
 								</a>
 							</li>
-
 							<li>
 								<hr class="dropdown-divider">
 							</li>
-
 							<li>
 								<a class="dropdown-item py-2" href="/taikhoan">
 									<i class="bi bi-person-circle me-2 text-danger"></i> Quản lý tài khoản
@@ -69,7 +65,7 @@
 					style="display: none; position: absolute; top: 100%; left: 0; z-index: 1050; max-height: 400px; overflow-y: auto;">
 				</div>
 			</form>
-			
+
 			<ul class="navbar-nav ms-auto mb-2 mb-lg-0">
 				<% if (typeof session !=='undefined' && session.MaNguoiDung) { %>
 					<li class="nav-item dropdown">
