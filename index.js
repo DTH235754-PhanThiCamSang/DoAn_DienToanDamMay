@@ -63,7 +63,7 @@ passport.deserializeUser((user, done) => done(null, user));
 passport.use(new GoogleStrategy({
     clientID: '386062152822-496al4d9lg3kics0mka00u3lns0tpvqh.apps.googleusercontent.com', 
     clientSecret: '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',
-    callbackURL: "http://localhost:8080/auth/google/callback"
+    callbackURL: process.env.GOOGLE_CALLBACK_URL || "http://localhost:8080/auth/google/callback"
   },
   function(accessToken, refreshToken, profile, done) {
     // Chỗ này là lúc Google trả thông tin về thành công
