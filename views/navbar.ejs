@@ -1,5 +1,6 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm rounded mb-3 mt-3">
+-<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
 	<div class="container-fluid">
 		<a class="navbar-brand fw-bold" href="/">
@@ -12,59 +13,61 @@
 		</button>
 
 		<div class="collapse navbar-collapse" id="navbarSupportedContent">
+
 			<ul class="navbar-nav me-auto mb-2 mb-lg-0">
 				<li class="nav-item">
 					<a class="nav-link active" aria-current="page" href="/"><i class="bi bi-house-door"></i> Trang
 						chủ</a>
 				</li>
 
-				<% // Sửa lại điều kiện: Vừa phải đăng nhập, VỪA phải có Quyen là 1 (Admin) if (typeof session
-					!=='undefined' && session.MaNguoiDung && session.QuyenHan==='admin') { %>
+				<% if (typeof session !=='undefined' && session.MaNguoiDung && session.QuyenHan==='admin' ) { %>
 					<li class="nav-item dropdown">
 						<a class="nav-link dropdown-toggle text-white fw-bold" href="#" id="navbarDropdown"
 							role="button" data-bs-toggle="dropdown" aria-expanded="false">
 							<i class="bi bi-grid-fill me-1"></i> Quản lý
 						</a>
 						<ul class="dropdown-menu shadow border-0" aria-labelledby="navbarDropdown">
-							<li>
-								<a class="dropdown-item py-2" href="/dienthoai">
-									<i class="bi bi-phone me-2 text-success"></i> Quản lý sản phẩm
-								</a>
-							</li>
-							<li>
-								<a class="dropdown-item py-2" href="/hangsanxuat">
-									<i class="bi bi-building me-2 text-primary"></i> Quản lý hãng sản xuất
-								</a>
-							</li>
-							<li>
-								<a class="dropdown-item py-2" href="/phieunhap">
-									<i class="bi bi-file-earmark-arrow-down me-2 text-warning"></i> Quản lý phiếu nhập
-								</a>
-							</li>
+							<li><a class="dropdown-item py-2" href="/dienthoai"><i
+										class="bi bi-phone me-2 text-success"></i> Quản lý sản phẩm</a></li>
+							<li><a class="dropdown-item py-2" href="/hangsanxuat"><i
+										class="bi bi-building me-2 text-primary"></i> Quản lý hãng sản xuất</a></li>
+							<li><a class="dropdown-item py-2" href="/phieunhap"><i
+										class="bi bi-file-earmark-arrow-down me-2 text-warning"></i> Quản lý phiếu
+									nhập</a></li>
 							<li>
 								<hr class="dropdown-divider">
 							</li>
-							<li>
-								<a class="dropdown-item py-2" href="/taikhoan">
-									<i class="bi bi-person-circle me-2 text-danger"></i> Quản lý tài khoản
-								</a>
-							</li>
+							<li><a class="dropdown-item py-2" href="/taikhoan"><i
+										class="bi bi-person-circle me-2 text-danger"></i> Quản lý tài khoản</a></li>
 						</ul>
 					</li>
 					<% } %>
 			</ul>
-			<!-- tìm kiếm -->
-			<form action="/timkiem" method="GET" class="d-flex position-relative mx-auto" style="width: 350px;">
-				<div class="input-group">
-					<input class="form-control" type="search" name="q" id="searchInput"
-						placeholder="Tìm kiếm điện thoại..." autocomplete="off" required>
-					<button class="btn btn-warning" type="submit"><i class="bi bi-search"></i></button>
-				</div>
 
-				<div id="searchResults" class="dropdown-menu w-100 shadow-sm mt-1"
-					style="display: none; position: absolute; top: 100%; left: 0; z-index: 1050; max-height: 400px; overflow-y: auto;">
-				</div>
-			</form>
+			<div class="d-flex align-items-center mx-auto">
+				<form action="/timkiem" method="GET" class="position-relative mb-0" style="width: 350px;">
+					<div class="input-group">
+						<input class="form-control" type="search" name="q" id="searchInput"
+							placeholder="Tìm kiếm điện thoại..." autocomplete="off" required>
+						<button class="btn btn-warning" type="submit"><i class="bi bi-search"></i></button>
+					</div>
+					<div id="searchResults" class="dropdown-menu w-100 shadow-sm mt-1"
+						style="display: none; position: absolute; top: 100%; left: 0; z-index: 1050; max-height: 400px; overflow-y: auto;">
+					</div>
+				</form>
+
+				<a class="nav-link position-relative text-white ms-5" href="/giohang" title="Giỏ hàng của bạn">
+					<i class="bi bi-cart3 fs-4"></i>
+					<% let tongSoLuong=0; if (typeof session !=='undefined' && session.gioHang) {
+						tongSoLuong=session.gioHang.reduce((sum, item)=> sum + item.SoLuong, 0);
+						}
+						%>
+						<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+							id="cart-badge">
+							<%= tongSoLuong %>
+						</span>
+				</a>
+			</div>
 
 			<ul class="navbar-nav ms-auto mb-2 mb-lg-0">
 				<% if (typeof session !=='undefined' && session.MaNguoiDung) { %>
@@ -80,16 +83,17 @@
 							<li>
 								<hr class="dropdown-divider">
 							</li>
-							<li><a class="dropdown-item text-danger" href="/dangxuat"><i
+							<li><a class="dropdown-item text-danger" href="/auth/dangxuat"><i
 										class="bi bi-box-arrow-right"></i> Đăng xuất</a></li>
 						</ul>
 					</li>
 					<% } else { %>
 						<li class="nav-item">
-							<a class="nav-link" href="/dangnhap"><i class="bi bi-box-arrow-in-right"></i> Đăng nhập</a>
+							<a class="nav-link" href="/auth/dangnhap"><i class="bi bi-box-arrow-in-right"></i> Đăng
+								nhập</a>
 						</li>
 						<li class="nav-item">
-							<a class="nav-link" href="/dangky"><i class="bi bi-person-plus"></i> Đăng ký</a>
+							<a class="nav-link" href="/auth/dangky"><i class="bi bi-person-plus"></i> Đăng ký</a>
 						</li>
 						<% } %>
 			</ul>
@@ -111,31 +115,27 @@
 				<%= successMessage %>
 					<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 			</div>
-
 			<% } %>
+
 				<script>
 					const searchInput = document.getElementById('searchInput');
 					const searchResults = document.getElementById('searchResults');
 					let debounceTimer;
 
-					// Khi người dùng gõ phím
 					searchInput.addEventListener('input', function () {
 						clearTimeout(debounceTimer);
 						const query = this.value.trim();
 
-						// Nếu gõ ít hơn 2 chữ thì ẩn đi
 						if (query.length < 2) {
 							searchResults.style.display = 'none';
 							return;
 						}
 
-						// Chờ 300ms sau khi ngừng gõ mới gọi Server (chống lag)
 						debounceTimer = setTimeout(() => {
 							fetch(`/api/timkiem?q=${encodeURIComponent(query)}`)
 								.then(res => res.json())
 								.then(data => {
 									if (data.length > 0) {
-										// Tạo danh sách sản phẩm xổ xuống
 										searchResults.innerHTML = data.map(sp => `
                             <a class="dropdown-item d-flex align-items-center py-2 border-bottom" href="/dienthoai/chitiet/${sp._id}">
                                 <img src="${sp.HinhAnh}" alt="${sp.TenDT}" style="width: 40px; height: 40px; object-fit: contain; margin-right: 10px;">
@@ -148,13 +148,12 @@
 									} else {
 										searchResults.innerHTML = '<span class="dropdown-item text-muted text-center py-2">Không tìm thấy sản phẩm nào!</span>';
 									}
-									searchResults.style.display = 'block'; // Hiện khung kết quả
+									searchResults.style.display = 'block';
 								})
 								.catch(err => console.error("Lỗi tìm kiếm:", err));
 						}, 300);
 					});
 
-					// Ẩn khung kết quả khi click chuột ra ngoài
 					document.addEventListener('click', function (e) {
 						if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
 							searchResults.style.display = 'none';
