@@ -1,0 +1,155 @@
+<%- include('navbar') %>
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <div class="col-md-3">
+                <%- include('sidebar') %>
+            </div>
+
+            <div class="col-md-9">
+                <div class="card shadow border-0">
+                    <div
+                        class="card-header bg-primary text-white fw-bold d-flex justify-content-between align-items-center py-2">
+                        <span><i class="bi bi-cart-check"></i> DANH SÁCH ĐƠN BÁN HÀNG</span>
+                        <a href="/donhang/tao-moi" class="btn btn-sm btn-light text-primary fw-bold shadow-sm">
+                            <i class="bi bi-plus-lg me-1"></i> Tạo hóa đơn mới
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 18%;">Khách hàng</th>
+                                    <th style="width: 30%;">Sản phẩm</th>
+                                    <th style="width: 12%;">Tổng tiền</th>
+                                    <th style="width: 12%;">Ngày đặt</th>
+                                    <th style="width: 12%;">Trạng thái</th>
+                                    <th style="width: 16%;">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% donHangs.forEach(dh=> { %>
+                                    <tr>
+                                        <td>
+                                            <strong>
+                                                <%= dh.TenNguoiNhan %>
+                                            </strong><br>
+                                            <small class="text-muted">
+                                                <%= dh.SoDienThoai %>
+                                            </small>
+                                        </td>
+
+                                        <td>
+                                            <% (dh.ChiTietDonHang || []).forEach(sp=> { %>
+                                                <div class="small mb-1">
+                                                    - <%= sp.TenDT %> | <%= sp.DungLuong %> | <%= sp.MauSac %>
+                                                                <span class="fw-bold">(x<%= sp.SoLuong %>)</span>
+                                                </div>
+                                                <% }) %>
+                                        </td>
+                                        </td>
+                                        <td class="text-danger fw-bold">
+                                            <%= dh.TongTien.toLocaleString('vi-VN') %>đ
+                                        </td>
+                                        <td>
+                                            <% let bg='bg-secondary' ; let txt='Chờ xác nhận' ; if
+                                                (dh.TrangThai==='ChoXacNhan' ) { bg='bg-warning text-dark' ;
+                                                txt='Chờ xác nhận' ; } else if (dh.TrangThai==='DangDongGoi' ) {
+                                                bg='bg-info' ; txt='Đang đóng gói' ; } else if
+                                                (dh.TrangThai==='DangGiao' ) { bg='bg-primary' ; txt='Đang giao hàng' ;
+                                                } else if (dh.TrangThai==='DaGiao' ) { bg='bg-success' ; txt='Đã giao' ;
+                                                } else if (dh.TrangThai==='DaHuy' ) { bg='bg-danger' ; txt='Đã hủy' ; }
+                                                %>
+                                                <span class="badge <%= bg %> px-2 py-1">
+                                                    <%= txt %>
+                                                </span>
+                                        </td>
+                                        <td>
+                                            <form action="/donhang/capnhat/<%= dh._id %>" method="POST" class="d-flex">
+                                                <select name="TrangThai" class="form-select form-select-sm me-1">
+                                                    <option value="ChoXacNhan" <%=dh.TrangThai==='ChoXacNhan'
+                                                        ? 'selected' : '' %>>Chờ xác nhận</option>
+                                                    <option value="DangDongGoi" <%=dh.TrangThai==='DangDongGoi'
+                                                        ? 'selected' : '' %>>Đang đóng gói</option>
+                                                    <option value="DangGiao" <%=dh.TrangThai==='DangGiao' ? 'selected'
+                                                        : '' %>>Đang giao</option>
+                                                    <option value="DaGiao" <%=dh.TrangThai==='DaGiao' ? 'selected' : ''
+                                                        %>>Đã giao</option>
+                                                    <option value="DaHuy" <%=dh.TrangThai==='DaHuy' ? 'selected' : '' %>
+                                                        >Hủy đơn</option>
+                                                </select>
+                                                <button class="btn btn-sm btn-primary">Lưu</button>
+
+                                            </form>
+                                            <div class="d-flex gap-1">
+                                                <a href="/donhang/sua/<%= dh._id %>"
+                                                    class="btn btn-sm btn-warning flex-fill fw-bold">
+                                                    <i class="bi bi-pencil-square"></i> Sửa
+                                                </a>
+
+                                                <button onclick="xacNhanXoa('<%= dh._id %>')"
+                                                    class="btn btn-sm btn-danger flex-fill fw-bold">
+                                                    <i class="bi bi-trash"></i> Xóa
+                                                </button>
+                                                <button class="btn btn-sm btn-info" data-bs-toggle="modal"
+                                                    data-bs-target="#modalHD-<%= dh._id %>">
+                                                    Xem
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <% donHangs.forEach(dh=> { %>
+        <div class="modal fade" id="modalHD-<%= dh._id %>" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content border-0 shadow-lg">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title">HÓA ĐƠN #<%= dh._id.toString().slice(-6).toUpperCase() %>
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p><strong>Khách hàng:</strong>
+                            <%= dh.TenNguoiNhan %>
+                        </p>
+                        <p><strong>SĐT:</strong>
+                            <%= dh.SoDienThoai %>
+                        </p>
+                        <hr>
+                        <% (dh.ChiTietDonHang || []).forEach(sp=> { %>
+                            <div class="d-flex justify-content-between">
+                                <span>
+                                    <%= sp.TenDT %> | <%= sp.DungLuong %>
+                                </span>
+                                <span>x<%= sp.SoLuong %></span>
+                            </div>
+                            <% }) %>
+                                <hr>
+                                <div class="d-flex justify-content-between fw-bold fs-5">
+                                    <span>TỔNG TIỀN:</span>
+                                    <span class="text-danger">
+                                        <%= dh.TongTien.toLocaleString('vi-VN') %>đ
+                                    </span>
+                                </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <% }) %>
+
+            <%- include('footer') %>
+
+                <script>
+                    function xacNhanXoa(id) {
+                        if (confirm('Bạn có chắc chắn muốn xóa đơn hàng này không?')) {
+                            window.location.href = '/donhang/xoa/' + id;
+                        }
+                    }
+                </script>

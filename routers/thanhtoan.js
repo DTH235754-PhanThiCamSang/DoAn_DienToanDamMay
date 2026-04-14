@@ -6,17 +6,17 @@ const SanPham = require('../models/dienthoai');
 // 1. HIỂN THỊ TRANG THANH TOÁN
 router.get('/', (req, res) => {
     let gioHang = req.session.gioHang || [];
-    
+
     // Lấy danh sách cần mua từ URL 
     let ids = req.query.id ? (Array.isArray(req.query.id) ? req.query.id : [req.query.id]) : [];
     let dls = req.query.dl ? (Array.isArray(req.query.dl) ? req.query.dl : [req.query.dl]) : [];
     let mss = req.query.ms ? (Array.isArray(req.query.ms) ? req.query.ms : [req.query.ms]) : [];
 
     let danhSachThanhToan = [];
-    
+
     if (ids.length > 0) {
         // Lọc từ giỏ hàng ra những món được chọn
-        danhSachThanhToan = gioHang.filter(item => 
+        danhSachThanhToan = gioHang.filter(item =>
             ids.some((id, i) => id === item.idDT && dls[i] === item.DungLuong && mss[i] === item.MauSac)
         );
     } else {
@@ -46,7 +46,7 @@ router.post('/xuly', async (req, res) => {
         let mss = Array.isArray(buy_mss) ? buy_mss : [buy_mss];
 
         // Lọc lấy danh sách những món THỰC SỰ thanh toán
-        let hangDaMua = gioHang.filter(item => 
+        let hangDaMua = gioHang.filter(item =>
             ids.some((id, i) => id === item.idDT && dls[i] === item.DungLuong && mss[i] === item.MauSac)
         );
 
@@ -72,19 +72,25 @@ router.post('/xuly', async (req, res) => {
         }
 
         // LƯU ĐƠN HÀNG VÀO DATABASE
+        // Khúc tạo đơn hàng mới trong router.post('/xuly')
         const donHangMoi = new DonHang({
-            HoVaTen, SoDienThoai, DiaChi, PhuongThucTT,
-            ChiTietDonHang: hangDaMua,
-            TongTien: hangDaMua.reduce((sum, i) => sum + (i.GiaBan * i.SoLuong), 0)
+            TenNguoiNhan: HoVaTen, // Lưu vào đúng trường TenNguoiNhan
+            SoDienThoai: SoDienThoai,
+            DiaChiGiao: DiaChi,
+            ChiTietDonHang: hangDaMua, // hangDaMua phải có đủ TenDT, MauSac, DungLuong
+            TongTien: tongTien,
+            PhuongThucThanhToan: PhuongThucTT,
+            TrangThai: 'ChoXacNhan'
         });
         await donHangMoi.save();
 
+
         // XÓA CÓ CHỌN LỌC TRONG GIỎ HÀNG
         // Chỉ xóa những món vừa mua xong
-        req.session.gioHang = gioHang.filter(item => 
+        req.session.gioHang = gioHang.filter(item =>
             !ids.some((id, i) => id === item.idDT && dls[i] === item.DungLuong && mss[i] === item.MauSac)
         );
-        
+
         // Xóa luôn túi tạm "Mua Ngay" nếu có
         req.session.danhSachMua = null;
 

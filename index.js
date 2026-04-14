@@ -20,6 +20,7 @@ const dienthoaiRouter = require('./routers/dienthoai');
 const phieunhapRouter = require('./routers/phieunhap');
 const giohangRouter = require('./routers/giohang');       
 const thanhtoanRouter = require('./routers/thanhtoan');
+const donHangRouter = require('./routers/donhang');
 
 // ==========================================
 // 2. KẾT NỐI DATABASE MONGODB
@@ -124,6 +125,7 @@ app.use('/dienthoai', dienthoaiRouter);
 app.use('/phieunhap', phieunhapRouter);
 app.use('/giohang', giohangRouter);
 app.use('/thanhtoan', thanhtoanRouter);
+app.use('/donhang', donHangRouter);
 
 // ==========================================
 // 8. XỬ LÝ LỖI 404 VÀ LỖI HỆ THỐNG

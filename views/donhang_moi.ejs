@@ -1,0 +1,45 @@
+<%- include('navbar') %>
+<div class="container mt-4">
+    <div class="card shadow border-0">
+        <div class="card-header bg-success text-white fw-bold">TẠO HÓA ĐƠN BÁN HÀNG THỦ CÔNG</div>
+        <div class="card-body">
+            <form action="/donhang/tao-moi" method="POST">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label>Tên khách hàng</label>
+                        <input type="text" name="HoVaTen" class="form-control" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label>Số điện thoại</label>
+                        <input type="tel" name="SoDienThoai" class="form-control" required>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label>Sản phẩm bán</label>
+                    <select name="idDT" class="form-select" required>
+                        <% danhSachSP.forEach(sp => { %>
+                            <option value="<%= sp._id %>"><%= sp.TenDT %></option>
+                        <% }) %>
+                    </select>
+                </div>
+
+                <div class="row">
+                    <div class="col-4 mb-3"><label>Dung lượng</label><input type="text" name="DungLuong" class="form-control" placeholder="128GB" required></div>
+                    <div class="col-4 mb-3"><label>Màu sắc</label><input type="text" name="MauSac" class="form-control" placeholder="Titan" required></div>
+                    <div class="col-4 mb-3"><label>Số lượng</label><input type="number" name="SoLuong" class="form-control" value="1" required></div>
+                </div>
+
+                <div class="mb-3">
+                    <label>Giá bán thực tế</label>
+                    <input type="number" name="GiaBan" class="form-control" required>
+                </div>
+
+                <div class="text-end">
+                    <a href="/donhang" class="btn btn-secondary">Hủy</a>
+                    <button type="submit" class="btn btn-primary">Lưu hóa đơn & Trừ kho</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

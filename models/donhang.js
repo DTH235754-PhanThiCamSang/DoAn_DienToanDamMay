@@ -1,20 +1,22 @@
 const mongoose = require('mongoose');
 
 const donHangSchema = new mongoose.Schema({
-    KhachHang: { type: mongoose.Schema.Types.ObjectId, ref: 'TaiKhoan' }, // Có thể null nếu khách vãng lai
-    TenNguoiNhan: String,
+    TenNguoiNhan: String, // Khớp với EJS
     SoDienThoai: String,
     DiaChiGiao: String,
-    ChiTiet: [{
-        SanPham: { type: mongoose.Schema.Types.ObjectId, ref: 'DienThoai' },
+    // Đổi tên từ ChiTiet thành ChiTietDonHang để khớp với EJS
+    ChiTietDonHang: [{
+        TenDT: String,
         SoLuong: Number,
-        GiaLucMua: Number // Phải lưu giá lúc mua,
+        MauSac: String,
+        DungLuong: String,
+        GiaBan: Number
     }],
     TongTien: Number,
-    PhuongThucThanhToan: String, // 'COD' hoặc 'VietQR'
-    TrangThai: { 
-        type: String, 
-        default: 'Chờ xác nhận' // Các trạng thái: Chờ xác nhận, Đang giao, Hoàn thành, Đã hủy
+    PhuongThucThanhToan: String,
+    TrangThai: {
+        type: String,
+        default: 'ChoXacNhan' // Nên dùng viết liền không dấu để code xử lý dễ hơn
     },
     NgayDat: { type: Date, default: Date.now }
 });
