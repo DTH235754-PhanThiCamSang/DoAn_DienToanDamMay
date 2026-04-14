@@ -2,7 +2,8 @@ const mongoose = require('mongoose');
 
 const dienThoaiSchema = new mongoose.Schema({
     TenDT: String,
-    HangSanXuat: { type: mongoose.Schema.Types.ObjectId, ref: 'HangSanXuat' },
+    // HangSanXuat: { type: mongoose.Schema.Types.ObjectId, ref: 'HangSanXuat' },
+    HangSanXuat: { type: String }, 
     MoTa: String,
     HinhAnh: String,
     
