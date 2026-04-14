@@ -59,22 +59,22 @@ router.get('/', async (req, res, next) => {
         // 1. Lấy toàn bộ tài khoản từ Database
         const danhSachTaiKhoan = await TaiKhoan.find();
         
-        // 2. Truyền sang file taikhoan.ejs (bằng cái tên biến là 'taikhoan')
+        // 2. Truyền sang file taikhoan
         res.render('taikhoan', { taikhoan: danhSachTaiKhoan }); 
     } catch (error) {
         next(error);
     }
 });
-// ==========================================
+
 // MỞ TRANG THÊM TÀI KHOẢN MỚI
-// ==========================================
+
 router.get('/them', (req, res) => {
     res.render('taikhoan_them', { title: 'Thêm tài khoản mới' });
 });
 
-// ==========================================
+
 // XỬ LÝ LƯU TÀI KHOẢN MỚI VÀO DATABASE
-// ==========================================
+
 router.post('/them', async (req, res, next) => {
     try {
         const { TenDangNhap, MatKhau, HoVaTen, Email, QuyenHan } = req.body;

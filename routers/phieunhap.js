@@ -3,9 +3,9 @@ var router = express.Router();
 var PhieuNhap = require('../models/phieunhap');
 var DienThoai = require('../models/dienthoai');
 
-// ==========================================
+
 // 1. MỞ TRANG THÊM PHIẾU NHẬP 
-// ==========================================
+
 router.get('/them', async (req, res, next) => {
     try {
         const today = new Date();
@@ -35,9 +35,9 @@ router.get('/them', async (req, res, next) => {
     }
 });
 
-// ==========================================
+
 // 2. XỬ LÝ LƯU PHIẾU VÀO DATABASE KHI BẤM NÚT LƯU
-// ==========================================
+
 router.post('/them', async (req, res, next) => {
     try {
         const { MaPhieuNhap, MaDienThoai, TenDienThoai, SoLuongNhap, GiaNhapVao, NguoiNhap } = req.body;
@@ -58,9 +58,8 @@ router.post('/them', async (req, res, next) => {
     }
 });
 
-// ==========================================
 // 3. DANH SÁCH PHIẾU NHẬP
-// ==========================================
+
 router.get('/', async (req, res) => {
     try {
         var dsPhieuNhap = await PhieuNhap.find().sort({ NgayNhap: -1 }); // Sắp xếp phiếu mới nhất lên đầu

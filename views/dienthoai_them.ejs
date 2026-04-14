@@ -69,7 +69,7 @@
                         <i class="bi bi-plus-circle"></i> Thêm phiên bản
                     </button>
                 </div>
-                <div class="card-body bg-light" id="khu-vuc-phien-ban">
+                <!-- <div class="card-body bg-light" id="khu-vuc-phien-ban">
                     <div class="border border-success bg-white rounded p-3 mb-3 position-relative phienban-item">
                         <div class="row">
                             <div class="col-md-3 mb-2">
@@ -94,7 +94,205 @@
                             </div>
                         </div>
                     </div>
+                </div> -->
+
+                <div class="card-body bg-light" id="khu-vuc-phien-ban">
+                    <div class="border border-success bg-white rounded p-3 mb-3 position-relative phienban-item">
+                        <div class="mb-3 border-bottom pb-2">
+                            <label class="small text-primary fw-bold"><i class="bi bi-magic me-1"></i>Điền nhanh từ
+                                Phiếu Nhập</label>
+                            <select class="form-select form-select-sm border-primary"
+                                onchange="dienNhanhPhieuNhap(this)">
+                                <option value="">-- Chọn máy đã nhập kho để tự điền --</option>
+                                <% if (typeof phieunhap !=='undefined' ) { %>
+                                    <% phieunhap.forEach(pn=> { %>
+                                        <option value="<%= pn._id %>" data-tendt="<%= pn.TenDienThoai %>"
+                                            data-soluong="<%= pn.SoLuongNhap || 0 %>"
+                                            data-gianhap="<%= pn.GiaNhapVao || 0 %>">
+                                            <%= pn.TenDienThoai %> | Tồn: <%= pn.SoLuongNhap || 0 %> | Giá: <%=
+                                                        (pn.GiaNhapVao || 0).toLocaleString('vi-VN') %>đ
+                                        </option>
+                                        <% }) %>
+                                            <% } %>
+                            </select>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-3 mb-2">
+                                <label class="small text-muted fw-bold">Dung lượng</label>
+                                <input type="text" name="DungLuong[]" class="form-control" placeholder="VD: 128GB"
+                                    required>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <label class="small text-muted fw-bold">Màu sắc</label>
+                                <input type="text" name="MauSac[]" class="form-control" placeholder="VD: Đen" required>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <label class="small text-muted fw-bold">Số lượng tồn</label>
+                                <input type="number" name="SoLuongTon[]" class="form-control" value="0" required>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <label class="small text-muted fw-bold">Link Ảnh bản này</label>
+                                <input type="text" name="HinhAnhPhienBan[]" class="form-control">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="small text-muted fw-bold text-primary">Giá nhập (VNĐ)</label>
+                                <input type="number" name="GiaNhap[]" class="form-control border-primary" required>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+
+                <script>
+                    const dsPhieuNhapJS = <% - JSON.stringify(typeof phieunhap !== 'undefined' ? phieunhap : []) %>;
+
+                    function themPhienBan() {
+                        let optionsHTML = '<option value="">-- Chọn máy đã nhập kho để tự điền --</option>';
+                        dsPhieuNhapJS.forEach(pn => {
+                            optionsHTML += `<option value="${pn._id}" 
+                data-tendt="${pn.TenDienThoai}" 
+                data-soluong="${pn.SoLuongNhap || 0}" 
+                data-gianhap="${pn.GiaNhapVao || 0}">
+                ${pn.TenDienThoai} | Tồn: ${pn.SoLuongNhap || 0} | Giá: ${Number(pn.GiaNhapVao || 0).toLocaleString('vi-VN')}đ
+            </option>`;
+                        });
+
+                        const html = `
+        <div class="border border-success bg-white rounded p-3 mb-3 position-relative phienban-item">
+            <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2 shadow-sm" onclick="this.closest('.phienban-item').remove()">
+                <i class="bi bi-trash"></i>
+            </button>
+            
+            <div class="mb-3 border-bottom pb-2 pe-5">
+                <label class="small text-primary fw-bold"><i class="bi bi-magic me-1"></i>Điền nhanh từ Phiếu Nhập</label>
+                <select class="form-select form-select-sm border-primary" onchange="dienNhanhPhieuNhap(this)">
+                    ${optionsHTML}
+                </select>
+            </div>
+
+            <div class="row">
+                <div class="col-md-3 mb-2">
+                    <label class="small text-muted fw-bold">Dung lượng</label>
+                    <input type="text" name="DungLuong[]" class="form-control" placeholder="VD: 128GB" required>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <label class="small text-muted fw-bold">Màu sắc</label>
+                    <input type="text" name="MauSac[]" class="form-control" placeholder="VD: Đen" required>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <label class="small text-muted fw-bold">Số lượng tồn</label>
+                    <input type="number" name="SoLuongTon[]" class="form-control" value="0" required>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <label class="small text-muted fw-bold">Link Ảnh bản này</label>
+                    <input type="text" name="HinhAnhPhienBan[]" class="form-control">
+                </div>
+                <div class="col-md-6">
+                    <label class="small text-muted fw-bold text-primary">Giá nhập (VNĐ)</label>
+                    <input type="number" name="GiaNhap[]" class="form-control border-primary" required>
+                </div>
+            </div>
+        </div>
+        `;
+                        document.getElementById('khu-vuc-phien-ban').insertAdjacentHTML('beforeend', html);
+                    }
+
+                    // HÀM TỰ ĐỘNG ĐIỀN VÀ TÁCH CHUỖI
+                    function dienNhanhPhieuNhap(selectElement) {
+                        const parentDiv = selectElement.closest('.phienban-item');
+                        const option = selectElement.options[selectElement.selectedIndex];
+
+                        if (option.value === "") return;
+
+                        // 1. Điền Số lượng và Giá nhập
+                        parentDiv.querySelector('input[name="SoLuongTon[]"]').value = option.getAttribute('data-soluong');
+                        parentDiv.querySelector('input[name="GiaNhap[]"]').value = option.getAttribute('data-gianhap');
+
+                        // 2. Tự động bóc tách Dung lượng và Màu sắc từ tên (VD: "Google Pixel 9 Pro (128GB - Hazel)")
+                        let tenDT = option.getAttribute('data-tendt');
+                        if (tenDT) {
+                            // Regex tìm nội dung nằm trong ngoặc đơn cuối cùng, cách nhau bởi dấu gạch ngang
+                            let match = tenDT.match(/\((.*?)\s*-\s*(.*?)\)/);
+                            if (match) {
+                                parentDiv.querySelector('input[name="DungLuong[]"]').value = match[1].trim(); // Lấy 128GB
+                                parentDiv.querySelector('input[name="MauSac[]"]').value = match[2].trim();    // Lấy Hazel
+                            }
+                        }
+                    }
+                </script>
+
+                <script>
+                    // // 1. Chuyển dữ liệu Phiếu Nhập từ EJS sang JavaScript để dùng cho hàm Thêm Mới
+                    // const dsPhieuNhapJS = <% - JSON.stringify(typeof phieunhap !== 'undefined' ? phieunhap : []) %>;
+
+                    // 2. Hàm đẻ ra khung phiên bản mới
+                    function themPhienBan() {
+                        // Tạo sẵn danh sách option từ dsPhieuNhapJS
+                        let optionsHTML = '<option value="">-- Chọn máy đã nhập kho để tự điền --</option>';
+                        dsPhieuNhapJS.forEach(pn => {
+                            optionsHTML += `<option value="${pn._id}" 
+                data-dungluong="${pn.DungLuong || ''}" 
+                data-mausac="${pn.MauSac || ''}" 
+                data-soluong="${pn.SoLuong || 0}" 
+                data-gianhap="${pn.GiaNhap || 0}">
+                ${pn.TenDienThoai} (${pn.DungLuong} - ${pn.MauSac}) | Tồn: ${pn.SoLuong} | Giá: ${pn.GiaNhap}đ
+            </option>`;
+                        });
+
+                        const html = `
+        <div class="border border-success bg-white rounded p-3 mb-3 position-relative phienban-item">
+            <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2 shadow-sm" onclick="this.closest('.phienban-item').remove()">
+                <i class="bi bi-trash"></i>
+            </button>
+            
+            <div class="mb-3 border-bottom pb-2 pe-5">
+                <label class="small text-primary fw-bold"><i class="bi bi-magic me-1"></i>Điền nhanh từ Phiếu Nhập</label>
+                <select class="form-select form-select-sm border-primary" onchange="dienNhanhPhieuNhap(this)">
+                    ${optionsHTML}
+                </select>
+            </div>
+
+            <div class="row">
+                <div class="col-md-3 mb-2">
+                    <label class="small text-muted fw-bold">Dung lượng</label>
+                    <input type="text" name="DungLuong[]" class="form-control" placeholder="128GB" required>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <label class="small text-muted fw-bold">Màu sắc</label>
+                    <input type="text" name="MauSac[]" class="form-control" placeholder="Màu" required>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <label class="small text-muted fw-bold">Số lượng tồn</label>
+                    <input type="number" name="SoLuongTon[]" class="form-control" value="0" required>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <label class="small text-muted fw-bold">Link Ảnh bản này</label>
+                    <input type="text" name="HinhAnhPhienBan[]" class="form-control">
+                </div>
+                <div class="col-md-6">
+                    <label class="small text-muted fw-bold text-primary">Giá nhập (VNĐ)</label>
+                    <input type="number" name="GiaNhap[]" class="form-control border-primary" required>
+                </div>
+            </div>
+        </div>
+        `;
+                        document.getElementById('khu-vuc-phien-ban').insertAdjacentHTML('beforeend', html);
+                    }
+
+                    // 3. Hàm tự động hút dữ liệu điền vào ô
+                    function dienNhanhPhieuNhap(selectElement) {
+                        const parentDiv = selectElement.closest('.phienban-item');
+                        const option = selectElement.options[selectElement.selectedIndex];
+
+                        if (option.value === "") return;
+
+                        // Tìm và điền thông số
+                        parentDiv.querySelector('input[name="DungLuong[]"]').value = option.getAttribute('data-dungluong');
+                        parentDiv.querySelector('input[name="MauSac[]"]').value = option.getAttribute('data-mausac');
+                        parentDiv.querySelector('input[name="SoLuongTon[]"]').value = option.getAttribute('data-soluong');
+                        parentDiv.querySelector('input[name="GiaNhap[]"]').value = option.getAttribute('data-gianhap');
+                    }
+                </script>
             </div>
 
             <div class="text-end mb-5">

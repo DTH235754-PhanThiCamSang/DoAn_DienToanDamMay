@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
 
-// 1. Trang hiển thị Giỏ hàng
+// Trang hiển thị Giỏ hàng
 router.get('/', (req, res) => {
-    // Đổi từ session.cart thành session.gioHang cho khớp với Navbar
+   
     let gioHang = req.session.gioHang || [];
     
     let tongTien = 0;
@@ -19,7 +19,7 @@ router.get('/', (req, res) => {
     });
 });
 
-// 2. Thêm vào giỏ hàng (Khớp với dữ liệu từ trang Chi Tiết gửi về)
+//  Thêm vào giỏ hàng (Khớp với dữ liệu từ trang Chi Tiết gửi về)
 router.post('/them', (req, res) => {
     try {
         const { idDT, TenDT, DungLuong, MauSac, GiaBan, HinhAnh } = req.body;
@@ -64,7 +64,7 @@ router.post('/them', (req, res) => {
     }
 });
 
-// 3. Tăng số lượng (+1) - Cần check cả ID và Màu/Dung lượng
+//  Tăng số lượng (+1) - Cần check cả ID và Màu/Dung lượng
 router.get('/tang/:idDT/:dungluong/:mausac', (req, res) => {
     let gioHang = req.session.gioHang || [];
     let item = gioHang.find(p => 
@@ -76,7 +76,7 @@ router.get('/tang/:idDT/:dungluong/:mausac', (req, res) => {
     res.redirect('/giohang');
 });
 
-// 4. Giảm số lượng (-1)
+//  Giảm số lượng (-1)
 router.get('/giam/:idDT/:dungluong/:mausac', (req, res) => {
     let gioHang = req.session.gioHang || [];
     let index = gioHang.findIndex(p => 
@@ -95,7 +95,7 @@ router.get('/giam/:idDT/:dungluong/:mausac', (req, res) => {
     res.redirect('/giohang');
 });
 
-// 5. Xóa sản phẩm
+//  Xóa sản phẩm
 router.get('/xoa/:idDT/:dungluong/:mausac', (req, res) => {
     let gioHang = req.session.gioHang || [];
     req.session.gioHang = gioHang.filter(p => 
@@ -103,7 +103,7 @@ router.get('/xoa/:idDT/:dungluong/:mausac', (req, res) => {
     );
     res.redirect('/giohang');
 });
-// 3. API Tăng số lượng (+1) - Trả về JSON
+//  API Tăng số lượng (+1) - Trả về JSON
 router.post('/update-quantity', (req, res) => {
     let { idDT, dungluong, mausac, action } = req.body;
     let gioHang = req.session.gioHang || [];

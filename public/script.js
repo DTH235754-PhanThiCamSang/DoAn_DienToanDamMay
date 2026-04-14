@@ -1,6 +1,6 @@
-// ==========================================
-// 1. XỬ LÝ BIẾN THỂ & TÍNH GIÁ (Ở TRANG CHI TIẾT)
-// ==========================================
+
+// 1. XỬ LÝ BIẾN THỂ & TÍNH GIÁ 
+
 function lamTronChuc(num) {
     return Math.round(num / 10) * 10;
 }
@@ -54,9 +54,9 @@ document.querySelectorAll('.variant-btn').forEach(btn => {
     });
 });
 
-// ==========================================
-// 2. XỬ LÝ GIỎ HÀNG (AJAX - KHÔNG LOAD LẠI TRANG)
-// ==========================================
+
+// 2. XỬ LÝ GIỎ HÀNG 
+
 
 // Hàm thêm vào giỏ
 async function themVaoGioHang(laMuaNgay = false) {
@@ -117,9 +117,9 @@ function removeItem(idDT, dl, ms) {
     }
 }
 
-// ==========================================
+
 // 3. TÍNH TOÁN CHECKBOX & TỔNG TIỀN
-// ==========================================
+
 function tinhToanTongTien() {
     let tong = 0;
     document.querySelectorAll('.chk-sanpham:checked').forEach(chk => {
@@ -142,32 +142,8 @@ document.addEventListener('DOMContentLoaded', () => {
     updateProductUI();
     tinhToanTongTien();
 });
-// // thanh toán trong khi tiến hành thanh toán
-// const nutThanhToan = document.querySelector('a[href="/thanhtoan"]');
-// if (nutThanhToan) {
-//     nutThanhToan.addEventListener('click', function(e) {
-//         e.preventDefault(); // Chặn việc nhảy trang mặc định
-        
-//         const cacSanPhamDuocChon = document.querySelectorAll('.chk-sanpham:checked');
-//         if (cacSanPhamDuocChon.length === 0) {
-//             alert("Vui lòng tích chọn ít nhất 1 sản phẩm để thanh toán!");
-//             return;
-//         }
 
-//         // Gom các ID và thông tin phiên bản (Dung lượng, Màu sắc) lại thành chuỗi
-//         let params = Array.from(cacSanPhamDuocChon).map(chk => {
-//             // Lấy dữ liệu từ hàng (row) tương ứng
-//             const row = chk.closest('.card-body');
-//             const id = chk.closest('.card').querySelector('button[onclick*="removeItem"]').getAttribute('onclick').match(/'([^']+)'/g);
-//             // id[0]: idDT, id[1]: DungLuong, id[2]: MauSac
-//             return `id=${id[0].replace(/'/g, "")}&dl=${id[1].replace(/'/g, "")}&ms=${id[2].replace(/'/g, "")}`;
-//         }).join('&');
 
-//         // Chuyển sang trang thanh toán kèm danh sách hàng đã chọn
-//         window.location.href = `/thanhtoan?${params}`;
-//     });
-// }
-// TRONG FILE SCRIPT.JS (Sửa đoạn redirect)
 const nutThanhToan = document.querySelector('a[href="/thanhtoan"]');
 if (nutThanhToan) {
     nutThanhToan.addEventListener('click', function(e) {
@@ -180,7 +156,7 @@ if (nutThanhToan) {
             const btnXoa = chk.closest('.card').querySelector('button[onclick*="removeItem"]');
             const match = btnXoa.getAttribute('onclick').match(/'([^']+)'/g);
             
-            // 🔥 Dùng encodeURIComponent để bảo vệ tên màu có dấu và dấu cách
+            // encodeURIComponent 
             const id = encodeURIComponent(match[0].replace(/'/g, ""));
             const dl = encodeURIComponent(match[1].replace(/'/g, ""));
             const ms = encodeURIComponent(match[2].replace(/'/g, ""));

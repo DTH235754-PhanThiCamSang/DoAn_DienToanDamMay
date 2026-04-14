@@ -37,23 +37,26 @@ router.get('/', async (req, res) => {
         res.send("Lỗi lấy danh sách: " + error.message);
     }
 });
-
-// 2. HIỂN THỊ FORM THÊM MỚI (Hợp nhất dữ liệu)
+// 2. HIỂN THỊ FORM THÊM MỚI
 router.get('/them', async (req, res) => {
     try {
         const hang = await HangSanXuat.find();
-        // Lấy danh sách tên máy từ phiếu nhập (không trùng lặp)
         const dsDaNhap = await PhieuNhap.distinct("TenDienThoai"); 
+        
+        //  Lấy toàn bộ phiếu nhập để làm tính năng điền tự động
+        const dsPhieuNhap = await PhieuNhap.find().sort({ NgayNhap: -1 });
 
         res.render('dienthoai_them', {
             title: 'Thêm điện thoại mới',
             hang: hang,
-            dsMayTrongKho: dsDaNhap // 🔥 Đặt tên đúng để khớp với EJS
+            dsMayTrongKho: dsDaNhap,
+            phieunhap: dsPhieuNhap //RUYỀN RA GIAO DIỆN
         });
     } catch (error) {
         res.send("Lỗi không mở được form: " + error.message);
     }
-});
+ });
+
 
 // 3. XỬ LÝ LƯU SẢN PHẨM MỚI
 router.post('/them', upload.single('HinhAnh'), async (req, res) => {
@@ -132,7 +135,7 @@ router.get('/sua/:id', async (req, res, next) => {
     }
 });  
 
-// 5. XỬ LÝ CẬP NHẬT (SỬA)
+// 5. XỬ LÝ CẬP NHẬT 
 router.post('/sua/:id', upload.single('HinhAnh'), async (req, res) => {
     try {
         const id = req.params.id;
@@ -185,7 +188,7 @@ router.post('/sua/:id', upload.single('HinhAnh'), async (req, res) => {
     }
 });
 
-// 6. CHI TIẾT VÀ 7. XÓA (Giữ nguyên logic của Sáng)
+// 6. CHI TIẾT VÀ 7. XÓA 
 router.get('/chitiet/:id', async (req, res) => {
     try {
         const dt = await DienThoai.findById(req.params.id).populate('HangSanXuat');
