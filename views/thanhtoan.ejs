@@ -89,10 +89,11 @@
     </div>
 </div>
 
+<span id="tongTienValue" data-value="<%= tongTien %>" style="display:none"></span>
 <script>
     function generateQR() {
-        const amount = <%= tongTien %>;
-        // const amount = document.getElementById('tongTien').value;
+        // const amount = <%= tongTien %>;
+        const amount = document.getElementById('tongTienValue').getAttribute('data-value');
         const bankId = "TPBank";
         const accountNo = "68838683883";
         const accountName = "PHAN THI CAM SANG";

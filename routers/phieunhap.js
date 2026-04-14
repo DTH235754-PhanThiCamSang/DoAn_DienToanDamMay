@@ -4,7 +4,7 @@ var PhieuNhap = require('../models/phieunhap');
 var DienThoai = require('../models/dienthoai');
 
 // ==========================================
-// 1. MỞ TRANG THÊM PHIẾU NHẬP (Lấy mã tự động)
+// 1. MỞ TRANG THÊM PHIẾU NHẬP 
 // ==========================================
 router.get('/them', async (req, res, next) => {
     try {
@@ -43,8 +43,8 @@ router.post('/them', async (req, res, next) => {
         const { MaPhieuNhap, MaDienThoai, TenDienThoai, SoLuongNhap, GiaNhapVao, NguoiNhap } = req.body;
 
         const phieuMoi = new PhieuNhap({
-            MaPhieuNhap: MaPhieuNhap, // Lưu mã PN... vào đây
-            MaDienThoai: MaDienThoai, // Lưu ObjectId vào đây
+            MaPhieuNhap: MaPhieuNhap, 
+            MaDienThoai: MaDienThoai, 
             TenDienThoai: TenDienThoai,
             SoLuongNhap: Number(SoLuongNhap),
             GiaNhapVao: Number(GiaNhapVao),

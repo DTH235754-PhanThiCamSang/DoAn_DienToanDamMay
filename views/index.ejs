@@ -33,95 +33,127 @@
 
 	<%- include('navbar') %>
 
-		<div id="bannerSPhone" class="carousel slide shadow mt-3 mb-5" data-bs-ride="carousel">        <div class="carousel-indicators">
-            <button type="button" data-bs-target="#bannerSPhone" data-bs-slide-to="0" class="active"></button>
-            <button type="button" data-bs-target="#bannerSPhone" data-bs-slide-to="1"></button>
-            <button type="button" data-bs-target="#bannerSPhone" data-bs-slide-to="2"></button>
-        </div>
+		<div id="bannerSPhone" class="carousel slide shadow mt-3 mb-5" data-bs-ride="carousel">
+			<div class="carousel-indicators">
+				<button type="button" data-bs-target="#bannerSPhone" data-bs-slide-to="0" class="active"></button>
+				<button type="button" data-bs-target="#bannerSPhone" data-bs-slide-to="1"></button>
+				<button type="button" data-bs-target="#bannerSPhone" data-bs-slide-to="2"></button>
+			</div>
 
-        <div class="carousel-inner">
-            <div class="carousel-item active" data-bs-interval="3000">
-                <a href="#sanpham"><img src="https://cdn.hoanghamobile.vn/i/home/Uploads/2026/04/01/s26-ultra-1200x375-0104.png" class="d-block w-100 img-fluid" style="object-fit: cover; height: 400px;" alt="Banner"></a>
-            </div>
-            
-            <div class="carousel-item" data-bs-interval="3000">
-                <a href="/dienthoai/chitiet/ID_IPHONE_15"> <img src="https://cdnv2.tgdd.vn/mwg-static/tgdd/Banner/6b/c7/6bc7ab4b3ff83d1a0cf6a9edc00c4970.png" class="d-block w-100" alt="Banner iPhone 15 Pro Max" style="height: 350px; object-fit: cover;"></a>
-            </div>
-            
-            <div class="carousel-item" data-bs-interval="3000">
-                <a href="/timkiem?q=Pixel"> <img src="https://cdnv2.tgdd.vn/mwg-static/tgdd/Banner/3c/85/3c85556f114640c1ca1cc9563be3a824.png" class="d-block w-100" alt="Banner Sale Google Pixel" style="height: 350px; object-fit: cover;"></a>
-            </div>
-        </div>
+			<div class="carousel-inner shadow-sm rounded-4 overflow-hidden mb-4">
+				<div class="carousel-item active" data-bs-interval="3000">
+					<a href="#sanpham">
+						<img src="https://cdn.hoanghamobile.vn/i/home/Uploads/2026/04/01/s26-ultra-1200x375-0104.png"
+							class="d-block w-100 banner-img" alt="Banner Samsung S26">
+					</a>
+				</div>
 
-        <button class="carousel-control-prev" type="button" data-bs-target="#bannerSPhone" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon"></span>
-        </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#bannerSPhone" data-bs-slide="next">
-            <span class="carousel-control-next-icon"></span>
-        </button>
-    </div>
+				<div class="carousel-item" data-bs-interval="3000">
+					<a href="/dienthoai/chitiet/ID_IPHONE_15">
+						<img src="https://cdnv2.tgdd.vn/mwg-static/tgdd/Banner/6b/c7/6bc7ab4b3ff83d1a0cf6a9edc00c4970.png"
+							class="d-block w-100 banner-img" alt="Banner iPhone 15 Pro Max">
+					</a>
+				</div>
+
+				<div class="carousel-item" data-bs-interval="3000">
+					<a href="/timkiem?q=Pixel">
+						<img src="https://cdnv2.tgdd.vn/mwg-static/tgdd/Banner/3c/85/3c85556f114640c1ca1cc9563be3a824.png"
+							class="d-block w-100 banner-img" alt="Banner Sale Google Pixel">
+					</a>
+				</div>
+			</div>
+
+			<button class="carousel-control-prev" type="button" data-bs-target="#bannerSPhone" data-bs-slide="prev">
+				<span class="carousel-control-prev-icon"></span>
+			</button>
+			<button class="carousel-control-next" type="button" data-bs-target="#bannerSPhone" data-bs-slide="next">
+				<span class="carousel-control-next-icon"></span>
+			</button>
+		</div>
 		<div class="container">
 
-		
 
-		<h2 class="mb-4"><i class="bi bi-fire text-danger"></i> Sản phẩm mới nhất</h2>
-		<div class="row mt-4">
-			<% if (dienthoai && dienthoai.length> 0) { %>
-				<% dienthoai.forEach(dt=> { %>
-					<div class="col-md-3 col-sm-6 mb-4">
-						<a href="/dienthoai/chitiet/<%= dt._id %>" class="text-decoration-none">
-							<div class="card h-100 shadow-sm border-0 product-card">
-								<img src="<%= dt.HinhAnh %>" class="card-img-top p-3" alt="<%= dt.TenDienThoai %>"
-									style="height: 250px; object-fit: contain;">
 
-								<div class="card-body text-center d-flex flex-column">
-									<h5 class="card-title fw-bold text-dark mt-2 text-truncate" title="<%= dt.TenDT %>">
-										<%= dt.TenDT %>
-									</h5>
+			<h2 class="mb-4"><i class="bi bi-fire text-danger"></i> Sản phẩm mới nhất</h2>
+			<div class="row mt-4">
+				<% if (dienthoai && dienthoai.length> 0) { %>
+					<% dienthoai.forEach(dt=> { %>
+						<div class="col-md-3 col-sm-6 mb-4">
+							<a href="/dienthoai/chitiet/<%= dt._id %>" class="text-decoration-none">
+								<div class="card h-100 shadow-sm border-0 product-card">
+									<img src="<%= dt.HinhAnh %>" class="card-img-top p-3" alt="<%= dt.TenDienThoai %>"
+										style="height: 250px; object-fit: contain;">
 
-									<p class="card-text text-danger fw-bold fs-5 mt-auto mb-3">
+									<div class="card-body text-center d-flex flex-column">
+										<h5 class="card-title fw-bold text-dark mt-2 text-truncate"
+											title="<%= dt.TenDT %>">
+											<%= dt.TenDT %>
+										</h5>
 
-									<p class="card-text text-danger fw-bold fs-5 mt-auto mb-3">
-										<% if(dt.CacPhienBan && dt.CacPhienBan.length> 0) {
-											// 1. Lấy phiên bản đầu tiên để tính giá đại diện
-											let pb = dt.CacPhienBan[0];
-											let giaNhap = dt.GiaNhap || 0;
+										<p class="card-text text-danger fw-bold fs-5 mt-auto mb-3">
 
-											// 2. Tính giá niêm yết (Giá nhập + % Lời)
-											let giaNiemYet = giaNhap * (1 + (pb.PhanTramLoi || 0) / 100);
+										<p class="card-text text-danger fw-bold fs-5 mt-auto mb-3">
+											<% if(dt.CacPhienBan && dt.CacPhienBan.length> 0) {
+												// 1. Lấy phiên bản đầu tiên để tính giá đại diện
+												let pb = dt.CacPhienBan[0];
+												let giaNhap = dt.GiaNhap || 0;
 
-											// 3. Tính giá cuối cùng (Giá niêm yết - % Giảm giá)
-											let giaCuoi = giaNiemYet * (1 - (pb.PhanTramGiamGia || 0) / 100);
+												// 2. Tính giá niêm yết (Giá nhập + % Lời)
+												let giaNiemYet = giaNhap * (1 + (pb.PhanTramLoi || 0) / 100);
 
-											// 4. Làm tròn đến hàng chục (Theo ý Sáng: 12.345 -> 12.350)
-											let giaHienThi = Math.round(giaCuoi / 10) * 10;
-											%>
-											<%= giaHienThi.toLocaleString('vi-VN') %>đ
-												<% } else { %>
-													Liên hệ
-													<% } %>
-									</p>
-									</p>
+												// 3. Tính giá cuối cùng (Giá niêm yết - % Giảm giá)
+												let giaCuoi = giaNiemYet * (1 - (pb.PhanTramGiamGia || 0) / 100);
 
-									<a href="/thanhtoan/muangay/<%= dt._id %>" class="btn btn-primary btn-sm w-100 fw-bold">Mua ngay</a>
+												// 4. Làm tròn đến hàng chục (Theo ý Sáng: 12.345 -> 12.350)
+												let giaHienThi = Math.round(giaCuoi / 10) * 10;
+												%>
+												<%= giaHienThi.toLocaleString('vi-VN') %>đ
+													<% } else { %>
+														Liên hệ
+														<% } %>
+										</p>
+										</p>
+
+										<a href="/thanhtoan/muangay/<%= dt._id %>"
+											class="btn btn-primary btn-sm w-100 fw-bold">Mua ngay</a>
+									</div>
+
 								</div>
-
-							</div>
-						</a>
-					</div>
-					<% }) %>
-						<% } else { %>
-							<div class="col-12 text-center text-muted py-5">
-								<i class="bi bi-box-seam fs-1 d-block mb-3"></i>
-								<h5>Chưa có sản phẩm nào.</h5>
-								<p>Vui lòng vào phần Quản lý để thêm điện thoại nhé!</p>
-							</div>
-							<% } %>
-		</div>
-
-		<%- include('footer') %>
+							</a>
+						</div>
+						<% }) %>
+							<% } else { %>
+								<div class="col-12 text-center text-muted py-5">
+									<i class="bi bi-box-seam fs-1 d-block mb-3"></i>
+									<h5>Chưa có sản phẩm nào.</h5>
+									<p>Vui lòng vào phần Quản lý để thêm điện thoại nhé!</p>
+								</div>
+								<% } %>
 			</div>
-			<%- include('javascript') %>
+
+			<%- include('footer') %>
+		</div>
+		<%- include('javascript') %>
+
+
+			<style>
+				.banner-img {
+					width: 100%;
+					height: auto;
+					aspect-ratio: 1200 / 350;
+					/* Tỉ lệ chuẩn xác để không bị cắt xén */
+					object-fit: contain;
+					/* Ép ảnh hiển thị 100% nội dung */
+					background-color: #f8f9fa;
+				}
+
+				@media (max-width: 768px) {
+					.banner-img {
+						aspect-ratio: 16 / 7;
+						object-fit: cover;
+					}
+				}
+			</style>
 </body>
 
 </html>

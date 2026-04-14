@@ -17,7 +17,7 @@ router.get('/', async (req, res) => {
     }
 });
 
-// 2. 🔥 BỔ SUNG: HIỂN THỊ FORM TẠO HÓA ĐƠN MỚI
+// 2.HIỂN THỊ FORM TẠO HÓA ĐƠN MỚI
 router.get('/tao-moi', async (req, res) => {
     try {
         // Lấy danh sách điện thoại để Admin chọn khi tạo hóa đơn
@@ -32,7 +32,7 @@ router.get('/tao-moi', async (req, res) => {
     }
 });
 
-// 3. 🔥 BỔ SUNG: XỬ LÝ LƯU HÓA ĐƠN MỚI VÀ TRỪ KHO
+//  XỬ LÝ LƯU HÓA ĐƠN MỚI VÀ TRỪ KHO
 router.post('/tao-moi', async (req, res) => {
     try {
         const { HoVaTen, SoDienThoai, DiaChi, idDT, DungLuong, MauSac, SoLuong, GiaBan } = req.body;

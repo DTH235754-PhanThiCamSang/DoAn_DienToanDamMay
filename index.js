@@ -148,5 +148,5 @@ app.use(function(err, req, res, next) {
 // ==========================================
 var port = process.env.PORT || 8080;
 app.listen(port, () => {
-    console.log(`🚀 Server đang chạy tại: http://localhost:${port}`);
+    console.log(`Server đang chạy tại: http://localhost:${port}`);
 });

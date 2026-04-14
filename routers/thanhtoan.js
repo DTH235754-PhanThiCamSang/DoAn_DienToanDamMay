@@ -70,15 +70,16 @@ router.post('/xuly', async (req, res) => {
                 }
             );
         }
+        // Tính tổng tiền dựa trên danh sách hàng đã mua
+        let tongTienThucTe = hangDaMua.reduce((sum, item) => sum + (item.GiaBan * item.SoLuong), 0);
 
         // LƯU ĐƠN HÀNG VÀO DATABASE
-        // Khúc tạo đơn hàng mới trong router.post('/xuly')
         const donHangMoi = new DonHang({
-            TenNguoiNhan: HoVaTen, // Lưu vào đúng trường TenNguoiNhan
+            TenNguoiNhan: HoVaTen,
             SoDienThoai: SoDienThoai,
             DiaChiGiao: DiaChi,
-            ChiTietDonHang: hangDaMua, // hangDaMua phải có đủ TenDT, MauSac, DungLuong
-            TongTien: tongTien,
+            ChiTietDonHang: hangDaMua,
+            TongTien: tongTienThucTe,
             PhuongThucThanhToan: PhuongThucTT,
             TrangThai: 'ChoXacNhan'
         });
