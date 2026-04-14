@@ -1,26 +1,14 @@
 const express = require('express');
 const router = express.Router();
-const DienThoai = require('../models/dienthoai');
-
-// --- HÀM TÍNH GIÁ ĐỘNG (Để không bị lỗi undefined) ---
-function tinhGiaBan(sp) {
-    if (sp.CacPhienBan && sp.CacPhienBan.length > 0) {
-        let pb = sp.CacPhienBan[0]; // Lấy phiên bản đầu tiên làm chuẩn
-        let giaNiemYet = (sp.GiaNhap || 0) * (1 + (pb.PhanTramLoi || 0) / 100);
-        let giaSauGiam = giaNiemYet * (1 - (pb.PhanTramGiamGia || 0) / 100);
-        return Math.round(giaSauGiam / 10) * 10;
-    }
-    return 0;
-}
 
 // 1. Trang hiển thị Giỏ hàng
 router.get('/', (req, res) => {
-    let gioHang = req.session.cart || [];
+    // Đổi từ session.cart thành session.gioHang cho khớp với Navbar
+    let gioHang = req.session.gioHang || [];
     
-    // Tính toán lại ThanhTien cho từng món và TongTien của cả giỏ
     let tongTien = 0;
     gioHang.forEach(item => {
-        item.ThanhTien = (item.Gia || 0) * (item.SoLuong || 1);
+        item.ThanhTien = (item.GiaBan || 0) * (item.SoLuong || 1);
         tongTien += item.ThanhTien;
     });
 
@@ -31,65 +19,120 @@ router.get('/', (req, res) => {
     });
 });
 
-// 2. Thêm vào giỏ hàng (POST)
-router.post('/them', async (req, res) => {
+// 2. Thêm vào giỏ hàng (Khớp với dữ liệu từ trang Chi Tiết gửi về)
+router.post('/them', (req, res) => {
     try {
-        const { idSanPham, soLuong, mauSac } = req.body;
-        if (!req.session.cart) req.session.cart = [];
-        let gioHang = req.session.cart;
+        const { idDT, TenDT, DungLuong, MauSac, GiaBan, HinhAnh } = req.body;
+        
+        if (!req.session.gioHang) req.session.gioHang = [];
+        let gioHang = req.session.gioHang;
 
-        let index = gioHang.findIndex(p => p.Id === idSanPham);
+        // Tìm xem đã có món hàng này (cùng ID, cùng Dung Lượng, cùng Màu) chưa
+        let index = gioHang.findIndex(p => 
+            p.idDT === idDT && 
+            p.DungLuong === DungLuong && 
+            p.MauSac === MauSac
+        );
 
         if (index !== -1) {
-            gioHang[index].SoLuong += parseInt(soLuong || 1);
+            // Nếu có rồi thì tăng số lượng
+            gioHang[index].SoLuong += 1;
         } else {
-            const sp = await DienThoai.findById(idSanPham);
-            if (!sp) return res.status(404).json({ success: false, message: 'Không tìm thấy sản phẩm!' });
-
-            const giaThucTe = tinhGiaBan(sp); // Gọi hàm tính giá ở trên
-
+            // Nếu chưa có thì thêm mới
             gioHang.push({
-                Id: sp._id.toString(),
-                TenDT: sp.TenDT,
-                HinhAnh: sp.HinhAnh,
-                Gia: giaThucTe, 
-                SoLuong: parseInt(soLuong) || 1,
-                MauSac: mauSac || 'Mặc định',
-                ThanhTien: giaThucTe * (parseInt(soLuong) || 1)
+                idDT: idDT,
+                TenDT: TenDT,
+                DungLuong: DungLuong,
+                MauSac: MauSac,
+                GiaBan: parseInt(GiaBan),
+                HinhAnh: HinhAnh,
+                SoLuong: 1
             });
         }
-        res.json({ success: true, message: 'Đã thêm vào giỏ hàng', tongSoSP: gioHang.length });
+
+        // Tính tổng số lượng để cập nhật Badge trên Navbar
+        let tongSoLuong = gioHang.reduce((sum, item) => sum + item.SoLuong, 0);
+
+        res.json({ 
+            success: true, 
+            message: 'Đã thêm vào giỏ hàng', 
+            tongSoLuong: tongSoLuong 
+        });
     } catch (error) {
+        console.error(error);
         res.status(500).json({ success: false, message: 'Lỗi server!' });
     }
 });
 
-// 3. Tăng số lượng (+1)
-router.get('/tang/:id', (req, res) => {
-    let gioHang = req.session.cart || [];
-    let item = gioHang.find(p => p.Id === req.params.id);
+// 3. Tăng số lượng (+1) - Cần check cả ID và Màu/Dung lượng
+router.get('/tang/:idDT/:dungluong/:mausac', (req, res) => {
+    let gioHang = req.session.gioHang || [];
+    let item = gioHang.find(p => 
+        p.idDT === req.params.idDT && 
+        p.DungLuong === req.params.dungluong && 
+        p.MauSac === req.params.mausac
+    );
     if (item) item.SoLuong++;
     res.redirect('/giohang');
 });
 
 // 4. Giảm số lượng (-1)
-router.get('/giam/:id', (req, res) => {
-    let gioHang = req.session.cart || [];
-    let item = gioHang.find(p => p.Id === req.params.id);
-    if (item && item.SoLuong > 1) {
-        item.SoLuong--;
-    } else {
-        // Nếu số lượng là 1 mà bấm giảm thì xóa luôn
-        req.session.cart = gioHang.filter(p => p.Id !== req.params.id);
+router.get('/giam/:idDT/:dungluong/:mausac', (req, res) => {
+    let gioHang = req.session.gioHang || [];
+    let index = gioHang.findIndex(p => 
+        p.idDT === req.params.idDT && 
+        p.DungLuong === req.params.dungluong && 
+        p.MauSac === req.params.mausac
+    );
+
+    if (index !== -1) {
+        if (gioHang[index].SoLuong > 1) {
+            gioHang[index].SoLuong--;
+        } else {
+            gioHang.splice(index, 1);
+        }
     }
     res.redirect('/giohang');
 });
 
 // 5. Xóa sản phẩm
-router.get('/xoa/:id', (req, res) => {
-    let gioHang = req.session.cart || [];
-    req.session.cart = gioHang.filter(p => p.Id !== req.params.id);
+router.get('/xoa/:idDT/:dungluong/:mausac', (req, res) => {
+    let gioHang = req.session.gioHang || [];
+    req.session.gioHang = gioHang.filter(p => 
+        !(p.idDT === req.params.idDT && p.DungLuong === req.params.dungluong && p.MauSac === req.params.mausac)
+    );
     res.redirect('/giohang');
 });
+// 3. API Tăng số lượng (+1) - Trả về JSON
+router.post('/update-quantity', (req, res) => {
+    let { idDT, dungluong, mausac, action } = req.body;
+    let gioHang = req.session.gioHang || [];
+    let item = gioHang.find(p => p.idDT === idDT && p.DungLuong === dungluong && p.MauSac === mausac);
 
+    if (item) {
+        if (action === 'tang') item.SoLuong++;
+        else if (action === 'giam' && item.SoLuong > 1) item.SoLuong--;
+        
+        let tongSoLuong = gioHang.reduce((sum, i) => sum + i.SoLuong, 0);
+        let tongTien = gioHang.reduce((sum, i) => sum + (i.GiaBan * i.SoLuong), 0);
+        
+        return res.json({ success: true, newQty: item.SoLuong, newThanhTien: item.GiaBan * item.SoLuong, tongSoLuong, tongTien });
+    }
+    res.json({ success: false });
+});
+
+// 4. API Xóa sản phẩm - Trả về JSON
+router.post('/remove-item', (req, res) => {
+    let { idDT, dungluong, mausac } = req.body;
+    let gioHang = req.session.gioHang || [];
+    
+    req.session.gioHang = gioHang.filter(p => 
+        !(p.idDT === idDT && p.DungLuong === dungluong && p.MauSac === mausac)
+    );
+
+    let tongTien = req.session.gioHang.reduce((sum, i) => sum + (i.GiaBan * i.SoLuong), 0);
+    let tongSoLuong = req.session.gioHang.reduce((sum, i) => sum + i.SoLuong, 0);
+    
+    res.json({ success: true, tongTien, tongSoLuong });
+});
 module.exports = router;

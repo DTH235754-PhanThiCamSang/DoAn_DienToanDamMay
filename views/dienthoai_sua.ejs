@@ -1,108 +1,281 @@
 <%- include('navbar') %>
-    <div class="container mt-4">
-        <div class="card col-md-8 mx-auto shadow border-0">
+    <div class="container mt-4 mb-5">
+        <div class="card col-md-10 mx-auto shadow border-0">
             <div class="card-header bg-warning text-dark fw-bold">
-                <i class="bi bi-pencil-square"></i> CẬP NHẬT THÔNG TIN ĐIỆN THOẠI
+                <i class="bi bi-pencil-square"></i> CẬP NHẬT THÔNG TIN VÀ PHIÊN BẢN ĐIỆN THOẠI
             </div>
             <div class="card-body">
-                <form action="/dienthoai/sua/<%= dt._id %>" method="POST">
-                    
-                    <div class="row">
+                <form action="/dienthoai/sua/<%= dt._id %>" method="POST" enctype="multipart/form-data">
+
+                    <h5 class="text-primary fw-bold border-bottom pb-2"><i class="bi bi-info-circle"></i> Thông tin
+                        chung (Dùng cho tất cả phiên bản)</h5>
+                    <div class="row mt-3">
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">Tên điện thoại</label>
-                            <input type="text" name="TenDT" class="form-control border-primary" value="<%= dt.TenDT %>" required>
+                            <input type="text" name="TenDT" class="form-control border-primary" value="<%= dt.TenDT %>"
+                                required>
                         </div>
-
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">Hãng sản xuất</label>
                             <select name="HangSanXuat" class="form-select" required>
-                                <% hang.forEach(h => { %>
-                                    <option value="<%= h._id %>" <%= (dt.HangSanXuat && dt.HangSanXuat._id.toString() === h._id.toString()) ? 'selected' : '' %>>
+                                <% hang.forEach(h=> { %>
+                                    <option value="<%= h._id %>" <%=(dt.HangSanXuat &&
+                                        dt.HangSanXuat._id.toString()===h._id.toString()) ? 'selected' : '' %>>
                                         <%= h.TenHang %>
                                     </option>
-                                <% }) %>
+                                    <% }) %>
                             </select>
                         </div>
                     </div>
 
-                    <div class="row bg-light p-3 rounded mb-3 border">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Giá bán tham khảo (VND)</label>
-                                <input type="text" id="GiaBan" class="form-control text-danger fw-bold" readonly placeholder="Tự động tính toán">
-                                <small class="text-muted">Giá của phiên bản đầu tiên</small>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Giá nhập (VND)</label>
-                                <input type="number" id="GiaNhap" name="GiaNhap" class="form-control" value="<%= dt.GiaNhap %>" required>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <% 
-                                let phanTramLoi_DaiDien = (dt.CacPhienBan && dt.CacPhienBan.length > 0) ? dt.CacPhienBan[0].PhanTramLoi : 10;
-                                let phanTramGiam_DaiDien = (dt.CacPhienBan && dt.CacPhienBan.length > 0) ? dt.CacPhienBan[0].PhanTramGiamGia : 0;
-                            %>
-                            
-                            <div class="mb-3">
-                                <label class="form-label text-danger fw-bold">Khuyến mãi / Giảm giá (%)</label>
-                                <input type="number" id="PhanTramGiamGia" name="PhanTramGiamGia" class="form-control" value="<%= phanTramGiam_DaiDien %>" min="0" max="100">
-                            </div>
-                            <div class="mb-3">
+                    <% let phanTramLoi_Chung=(dt.CacPhienBan && dt.CacPhienBan.length> 0) ?
+                        (dt.CacPhienBan[0].PhanTramLoi || 0) : 10;
+                        let phanTramGiam_Chung = (dt.CacPhienBan && dt.CacPhienBan.length > 0) ?
+                        (dt.CacPhienBan[0].PhanTramGiamGia || 0) : 0;
+                        %>
+                        <div class="row bg-light p-3 rounded mb-3 border">
+                            <div class="col-md-6 mb-3 mb-md-0">
                                 <label class="form-label fw-bold">Lợi nhuận mong muốn (%)</label>
-                                <input type="number" id="PhanTramLoi" name="PhanTramLoi" class="form-control" value="<%= phanTramLoi_DaiDien %>" min="0">
+                                <input type="number" id="PhanTramLoi" name="PhanTramLoi_Chung"
+                                    class="form-control text-primary fw-bold" value="<%= phanTramLoi_Chung %>" min="0">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-danger fw-bold">Khuyến mãi / Giảm giá (%)</label>
+                                <input type="number" id="PhanTramGiamGia" name="PhanTramGiam_Chung"
+                                    class="form-control text-danger fw-bold" value="<%= phanTramGiam_Chung %>" min="0"
+                                    max="100">
                             </div>
                         </div>
-                    </div>
 
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Mô tả sản phẩm</label>
-                        <textarea name="MoTa" class="form-control" rows="4" required><%= dt.MoTa %></textarea>
-                    </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Hình ảnh chính (Chọn từ máy)</label>
 
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Đường dẫn hình ảnh (URL)</label>
-                        <input type="text" name="HinhAnh" class="form-control" value="<%= dt.HinhAnh %>">
-                        <% if(dt.HinhAnh) { %>
-                            <div class="mt-2 text-center">
-                                <img src="<%= dt.HinhAnh %>" alt="Preview" class="img-thumbnail" style="max-height: 100px;">
-                            </div>
-                        <% } %>
-                    </div>
+                            <input type="hidden" name="HinhAnhCu" value="<%= dt.HinhAnh %>">
 
-                    <div class="text-center mt-4">
-                        <button type="submit" class="btn btn-primary px-5 fw-bold"><i class="bi bi-save"></i> Lưu thay đổi</button>
-                        <a href="/dienthoai" class="btn btn-secondary px-4"><i class="bi bi-arrow-left"></i> Quay lại</a>
-                    </div>
+                            <input type="file" name="HinhAnh" class="form-control" accept="image/*">
+
+                            <% if(dt.HinhAnh) { %>
+                                <div class="mt-2">
+                                    <small class="text-muted d-block mb-1">Ảnh hiện tại:</small>
+                                    <img src="<%= dt.HinhAnh %>" alt="Preview" class="img-thumbnail"
+                                        style="max-height: 100px;">
+                                </div>
+                                <% } %>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Mô tả sản phẩm</label>
+                            <textarea name="MoTa" class="form-control" rows="3" required><%= dt.MoTa %></textarea>
+                        </div>
+
+                        <h5
+                            class="text-success fw-bold border-bottom pb-2 mt-4 d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-box-seam"></i> Các phiên bản sản phẩm</span>
+                            <button type="button" class="btn btn-sm btn-outline-success" onclick="themPhienBan()">
+                                <i class="bi bi-plus-circle"></i> Thêm phiên bản
+                            </button>
+                        </h5>
+
+                        <div id="danhSachPhienBan">
+                            <% if(dt.CacPhienBan && dt.CacPhienBan.length> 0) { %>
+                                <% dt.CacPhienBan.forEach((pb, index)=> { %>
+                                    <div
+                                        class="variant-row border border-success p-3 mb-3 rounded bg-white position-relative">
+                                        <button type="button"
+                                            class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2"
+                                            onclick="xoaPhienBan(this)">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+
+                                        <div class="col-md-12 mb-3 bg-light p-2 rounded border border-info">
+                                            <label class="small fw-bold text-primary"><i
+                                                    class="bi bi-box-arrow-in-down"></i> Cập nhật nhanh từ Phiếu
+                                                Nhập</label>
+                                            <select
+                                                class="form-select form-select-sm border-primary text-primary select2-phieu-nhap"
+                                                style="width: 100%;" onchange="tuDongDienPhieuNhap(this)">
+                                                <option value="">-- Nhập tay hoặc Chọn phiếu nhập để tự điền dữ liệu --
+                                                </option>
+                                                <% phieunhap.forEach(pn=> {
+                                                    // 🔥 LOGIC TỰ ĐỘNG CHỌN SẴN: Dò tìm Dung lượng và Màu sắc trong Tên       phiếu nhập
+                                                    let isSelected = (pb.DungLuong && pb.MauSac &&
+                                                    pn.TenDienThoai.includes(pb.DungLuong) &&
+                                                    pn.TenDienThoai.includes(pb.MauSac)) ? 'selected' : '';
+                                                    %>
+                                                    <option value="<%= pn.GiaNhapVao %>"
+                                                        data-soluong="<%= pn.SoLuongNhap %>"
+                                                        data-tendt="<%= pn.TenDienThoai %>" <%=isSelected %>>
+                                                        Mã: <%= pn.MaDienThoai || 'N/A' %> | <%= pn.TenDienThoai %> |
+                                                                SL: <%= pn.SoLuongNhap %> | Giá: <%=
+                                                                        Number(pn.GiaNhapVao).toLocaleString('vi-VN') %>
+                                                                        đ
+                                                    </option>
+                                                    <% }) %>
+                                            </select>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-md-3 mb-2">
+                                                <label class="small fw-bold text-muted">Dung lượng</label>
+                                                <input type="text" name="PB_DungLuong[]"
+                                                    class="form-control form-control-sm" value="<%= pb.DungLuong %>"
+                                                    required>
+                                            </div>
+                                            <div class="col-md-3 mb-2">
+                                                <label class="small fw-bold text-muted">Màu sắc</label>
+                                                <input type="text" name="PB_MauSac[]"
+                                                    class="form-control form-control-sm" value="<%= pb.MauSac %>"
+                                                    required>
+                                            </div>
+                                            <div class="col-md-2 mb-2">
+                                                <label class="small fw-bold text-muted">Tồn kho</label>
+                                                <input type="number" name="PB_SoLuong[]"
+                                                    class="form-control form-control-sm"
+                                                    value="<%= pb.SoLuongTon || 0 %>" min="0" required>
+                                            </div>
+                                            <div class="col-md-4 mb-2">
+                                                <label class="small fw-bold text-muted">Link Ảnh bản này</label>
+                                                <input type="text" name="PB_HinhAnh[]"
+                                                    class="form-control form-control-sm"
+                                                    value="<%= pb.HinhAnhPhienBan || '' %>">
+                                            </div>
+                                        </div>
+
+                                        <div class="row mt-2 bg-light p-2 rounded">
+                                            <div class="col-md-6">
+                                                <label class="small fw-bold">Giá nhập (VNĐ)</label>
+                                                <input type="number" name="PB_GiaNhap[]"
+                                                    class="form-control border-warning gia-nhap-pb"
+                                                    value="<%= pb.GiaNhap || 0 %>" required
+                                                    oninput="tinhToanToanBoGia()">
+                                            </div>
+                                            <div class="col-md-6 text-end">
+                                                <label class="small fw-bold text-danger">Giá bán ra khách (Tự động
+                                                    tính)</label>
+                                                <div class="fs-5 fw-bold text-danger gia-ban-hien-thi">Đang tính...
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <% }) %>
+                                        <% } %>
+                        </div>
+
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-primary px-5 fw-bold"><i class="bi bi-save"></i> Lưu
+                                toàn bộ thay đổi</button>
+                            <a href="/dienthoai" class="btn btn-secondary px-4"><i class="bi bi-arrow-left"></i> Quay
+                                lại</a>
+                        </div>
                 </form>
             </div>
         </div>
     </div>
+    <div id="duLieuPhieuNhap" data-json="<%= JSON.stringify(phieunhap || []) %>" style="display: none;"></div>
+    <!-- THU viện tìm kiếm nhanh -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <script>
-        const inputGiaNhap = document.getElementById('GiaNhap');
         const inputLoi = document.getElementById('PhanTramLoi');
         const inputGiam = document.getElementById('PhanTramGiamGia');
-        const inputGiaBan = document.getElementById('GiaBan');
+        const khuVucPhienBan = document.getElementById('danhSachPhienBan');
 
-        function tinhGiaBan() {
-            let giaNhap = parseFloat(inputGiaNhap.value) || 0;
+        // 🔥 Lấy danh sách Phiếu nhập từ Backend truyền sang Javascript
+        const theGiauDuLieu = document.getElementById('duLieuPhieuNhap').getAttribute('data-json');
+        const dsPhieuNhap = JSON.parse(theGiauDuLieu);
+
+        // Tạo sẵn các lựa chọn (Options) cho cái thẻ <select> Phiếu nhập
+        let optionPhieuNhap = '<option value="">-- Nhập tay hoặc Chọn phiếu nhập để tự điền dữ liệu --</option>';
+        dsPhieuNhap.forEach(pn => {
+            let giaVND = Number(pn.GiaNhapVao).toLocaleString('vi-VN');
+            optionPhieuNhap += `<option value="${pn.GiaNhapVao}" data-soluong="${pn.SoLuongNhap}">
+                Mã: ${pn.MaDienThoai || 'N/A'} | ${pn.TenDienThoai} | SL: ${pn.SoLuongNhap} | Giá: ${giaVND}đ
+            </option>`;
+        });
+
+        function tinhToanToanBoGia() {
             let phanTramLoi = parseFloat(inputLoi.value) || 0;
             let phanTramGiam = parseFloat(inputGiam.value) || 0;
 
-            let giaNiemYet = giaNhap * (1 + phanTramLoi / 100);
-            let giaCuoi = giaNiemYet * (1 - phanTramGiam / 100);
-            let giaLamTron = Math.round(giaCuoi / 10) * 10;
+            document.querySelectorAll('.variant-row').forEach(row => {
+                let giaNhapInput = row.querySelector('.gia-nhap-pb');
+                let giaBanHienThi = row.querySelector('.gia-ban-hien-thi');
 
-            // Hiển thị định dạng tiền tệ cho đẹp mắt
-            inputGiaBan.value = giaLamTron.toLocaleString('vi-VN') + ' VNĐ';
+                let giaNhap = parseFloat(giaNhapInput.value) || 0;
+                let giaNiemYet = Math.round((giaNhap * (1 + phanTramLoi / 100)) / 10) * 10;
+                let giaCuoi = Math.round((giaNiemYet * (1 - phanTramGiam / 100)) / 10) * 10;
+
+                giaBanHienThi.innerText = giaCuoi.toLocaleString('vi-VN') + ' VNĐ';
+            });
         }
 
-        // Lắng nghe sự kiện gõ phím
-        [inputGiaNhap, inputLoi, inputGiam].forEach(el => {
-            if(el) el.addEventListener('input', tinhGiaBan);
-        });
+        // 🔥 HÀM MỚI: Tự động điền dữ liệu khi chọn Phiếu Nhập
+        function tuDongDienPhieuNhap(selectElement) {
+            const row = selectElement.closest('.variant-row');
+            const giaNhapInput = row.querySelector('.gia-nhap-pb');
+            const soLuongInput = row.querySelector('input[name="PB_SoLuong[]"]');
 
-        // Tự động tính toán lần đầu khi vừa mở trang Sửa
-        window.addEventListener('DOMContentLoaded', tinhGiaBan);
+            const option = selectElement.options[selectElement.selectedIndex];
+            const giaVao = option.value;
+            const soLuong = option.getAttribute('data-soluong');
+
+            if (giaVao) {
+                giaNhapInput.value = giaVao; // Tự điền giá
+                if (soLuong) soLuongInput.value = soLuong; // Tự điền số lượng tồn
+                tinhToanToanBoGia(); // Kích hoạt tính lại giá bán màu đỏ
+            }
+        }
+
+        function themPhienBan() {
+            const html = `
+                <div class="variant-row border border-success p-3 mb-3 rounded bg-white position-relative">
+                    <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2" onclick="xoaPhienBan(this)"><i class="bi bi-trash"></i></button>
+                    
+                <div class="col-md-12 mb-3 bg-light p-2 rounded border border-info">
+                        <label class="small fw-bold text-primary"><i class="bi bi-box-arrow-in-down"></i> Liên kết Phiếu Nhập kho</label>
+                    <select class="form-select form-select-sm border-primary text-primary select2-phieu-nhap" style="width: 100%;" onchange="tuDongDienPhieuNhap(this)">
+                        ${optionPhieuNhap}
+                    </select>                        
+                </div>
+
+                    <div class="row">
+                        <div class="col-md-3 mb-2"><label class="small fw-bold text-muted">Dung lượng</label><input type="text" name="PB_DungLuong[]" class="form-control form-control-sm" required></div>
+                        <div class="col-md-3 mb-2"><label class="small fw-bold text-muted">Màu sắc</label><input type="text" name="PB_MauSac[]" class="form-control form-control-sm" required></div>
+                        <div class="col-md-2 mb-2"><label class="small fw-bold text-muted">Tồn kho</label><input type="number" name="PB_SoLuong[]" class="form-control form-control-sm" value="0" required></div>
+                        <div class="col-md-4 mb-2"><label class="small fw-bold text-muted">Link Ảnh bản này</label><input type="text" name="PB_HinhAnh[]" class="form-control form-control-sm"></div>
+                    </div>
+                    <div class="row mt-2 bg-light p-2 rounded">
+                        <div class="col-md-6"><label class="small fw-bold">Giá nhập (VNĐ)</label><input type="number" name="PB_GiaNhap[]" class="form-control border-warning gia-nhap-pb" value="0" required oninput="tinhToanToanBoGia()"></div>
+                        <div class="col-md-6 text-end"><label class="small fw-bold text-danger">Giá bán ra khách (Tự động)</label><div class="fs-5 fw-bold text-danger gia-ban-hien-thi">0 VNĐ</div></div>
+                    </div>
+                </div>`;
+            khuVucPhienBan.insertAdjacentHTML('beforeend', html);
+            ganSuKienGiaNhap();
+            $('.select2-phieu-nhap').select2();
+        }
+
+        function xoaPhienBan(btn) {
+            if (confirm('Sáng có chắc muốn xóa phiên bản này?')) {
+                btn.closest('.variant-row').remove();
+            }
+        }
+
+        function ganSuKienGiaNhap() {
+            document.querySelectorAll('.gia-nhap-pb').forEach(input => {
+                input.removeEventListener('input', tinhToanToanBoGia);
+                input.addEventListener('input', tinhToanToanBoGia);
+            });
+        }
+
+        inputLoi.addEventListener('input', tinhToanToanBoGia);
+        inputGiam.addEventListener('input', tinhToanToanBoGia);
+        ganSuKienGiaNhap();
+        tinhToanToanBoGia();
+        // gõ tìm kiếm nhanh cho Phiếu nhập
+        $(document).ready(function () {
+            $('.select2-phieu-nhap').select2();
+            tinhToanToanBoGia();
+        });
     </script>

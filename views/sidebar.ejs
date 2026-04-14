@@ -1,21 +1,35 @@
+<% 
+    let qh = (typeof QuyenHan !== 'undefined') ? QuyenHan : 'khach';
+    let isAdmin = (qh === 'admin');
+    let isThuKho = (qh === 'thukho' || isAdmin);
+    // let isBanHang = (qh === 'banhang' || isAdmin); // (Mở ghi chú ra nếu Sáng có thêm nút Đơn Hàng)
+%>
 
 <div class="list-group list-group-flush rounded shadow-sm bg-white">
     <div class="bg-dark text-white text-center py-3 fw-bold rounded-top">
         <i class="bi bi-shield-lock me-2"></i> ADMIN PANEL
     </div>
     
-    <a href="/dienthoai" class="list-group-item list-group-item-action py-3 fw-bold <%= typeof active !== 'undefined' && active === 'sanpham' ? 'active' : 'text-dark' %>">
+    <a href="<%= isAdmin ? '/dienthoai' : '#' %>" 
+       class="list-group-item list-group-item-action py-3 fw-bold <%= isAdmin ? (typeof active !== 'undefined' && active === 'sanpham' ? 'active' : 'text-dark') : 'disabled text-muted bg-light opacity-50' %>">
         <i class="bi bi-phone me-2"></i> Quản lý Sản phẩm
     </a>
-    <a href="/hangsanxuat" class="list-group-item list-group-item-action py-3 fw-bold <%= typeof active !== 'undefined' && active === 'hangsanxuat' ? 'active' : 'text-dark' %>">
+    
+    <a href="<%= isAdmin ? '/hangsanxuat' : '#' %>" 
+       class="list-group-item list-group-item-action py-3 fw-bold <%= isAdmin ? (typeof active !== 'undefined' && active === 'hangsanxuat' ? 'active' : 'text-dark') : 'disabled text-muted bg-light opacity-50' %>">
         <i class="bi bi-tags me-2"></i> Quản lý Hãng sản xuất
     </a>
-    <a href="/phieunhap" class="list-group-item list-group-item-action py-3 fw-bold <%= typeof active !== 'undefined' && active === 'phieunhap' ? 'active' : 'text-dark' %>">
+    
+    <a href="<%= isThuKho ? '/phieunhap' : '#' %>" 
+       class="list-group-item list-group-item-action py-3 fw-bold <%= isThuKho ? (typeof active !== 'undefined' && active === 'phieunhap' ? 'active' : 'text-dark') : 'disabled text-muted bg-light opacity-50' %>">
         <i class="bi bi-file-earmark-arrow-down me-2"></i> Quản lý Phiếu nhập
     </a>
-    <a href="/taikhoan" class="list-group-item list-group-item-action py-3 fw-bold <%= typeof active !== 'undefined' && active === 'taikhoan' ? 'active' : 'text-dark' %>">
+    
+    <a href="<%= isAdmin ? '/taikhoan' : '#' %>" 
+       class="list-group-item list-group-item-action py-3 fw-bold <%= isAdmin ? (typeof active !== 'undefined' && active === 'taikhoan' ? 'active' : 'text-dark') : 'disabled text-muted bg-light opacity-50' %>">
         <i class="bi bi-person-circle me-2"></i> Quản lý Tài khoản
     </a>
+    
     <hr class="my-0">
 
     <a href="/" class="list-group-item list-group-item-action py-3 fw-bold text-danger rounded-bottom">

@@ -1,22 +1,25 @@
-var mongoose = require('mongoose');
+const mongoose = require('mongoose');
 
-var dienThoaiSchema = new mongoose.Schema({
+const dienThoaiSchema = new mongoose.Schema({
+    TenDT: String,
     HangSanXuat: { type: mongoose.Schema.Types.ObjectId, ref: 'HangSanXuat' },
-    TaiKhoan: { type: mongoose.Schema.Types.ObjectId, ref: 'TaiKhoan' }, // Người nhập hàng
-    TenDT: { type: String, required: true },
-    MoTa: { type: String, required: true },
-    GiaNhap: { type: Number, required: true },
+    MoTa: String,
+    HinhAnh: String,
     
-    
-    HinhAnh: { type: String }, 
-   CacPhienBan: [{
-    DungLuong: String,
-    MauSac: String,
-    PhanTramLoi: Number,   // VD: 15 (nghĩa là lời 15%)
-    PhanTramGiamGia: Number, // VD: 5 (nghĩa là giảm 5%)
-    SoLuongTon: Number
-}]
-   
+    // Giá đại diện để hiển thị ngoài trang chủ (Backend tự động tính và điền)
+    GiaNhap: { type: Number, default: 0 }, 
+    GiaBan: { type: Number, default: 0 },  
+
+    CacPhienBan: [{
+        DungLuong: String,
+        MauSac: String,
+        SoLuongTon: { type: Number, default: 0 },
+        HinhAnhPhienBan: String,
+        PhanTramLoi: { type: Number, default: 10 },
+        PhanTramGiamGia: { type: Number, default: 0 },
+        GiaNhap: { type: Number, default: 0 },
+        GiaBan: { type: Number, default: 0 }
+    }]
 });
 
 module.exports = mongoose.model('DienThoai', dienThoaiSchema);

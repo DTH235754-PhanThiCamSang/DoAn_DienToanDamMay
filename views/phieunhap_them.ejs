@@ -1,59 +1,118 @@
 <%- include('navbar') %>
-    <div class="container mt-4">
-        <div class="card col-md-6 mx-auto shadow border-0">
-            <div class="card-header bg-primary text-white fw-bold">LẬP PHIẾU NHẬP HÀNG MỚI</div>
-            <div class="card-body">
+
+    <div class="container mt-5 mb-5">
+        <div class="card col-md-8 mx-auto shadow-lg border-0 rounded-4 overflow-hidden">
+
+            <div class="card-header bg-primary text-white py-3">
+                <h5 class="mb-0 fw-bold text-center fs-4">
+                    <i class="bi bi-file-earmark-plus-fill me-2"></i> LẬP PHIẾU NHẬP KHO MỚI
+                </h5>
+            </div>
+
+            <div class="card-body p-4 bg-light">
                 <form action="/phieunhap/them" method="POST">
 
-                    <div class="mb-4">
-                        <label class="form-label fw-bold">Tên điện thoại</label>
-                        <select id="selectPhone" name="MaDienThoai" class="form-select border-primary" required
-                            onchange="updatePrice()">
-                            <option value="" data-price="0">-- Chọn điện thoại đã có --</option>
-                            <% dienthoai.forEach(dt=> { %>
-                                <option value="<%= dt._id %>" data-price="<%= dt.GiaNhap %>">
-                                    <%= dt.TenDT %>
-                                </option>
-                                <% }) %>
-                        </select>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-6 mb-3">
-                            <label class="form-label fw-bold">Số lượng nhập</label>
-                            <input type="number" name="SoLuongNhap" class="form-control" min="1" value="1" required>
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-muted small"><i class="bi bi-person-badge"></i> Nhân
+                                viên lập phiếu</label>
+                            <input type="text" class="form-control bg-white fw-bold text-primary border-0 shadow-sm"
+                                value="<%= session.HoVaTen %>" disabled>
+                            <input type="hidden" name="NguoiNhap" value="<%= session.HoVaTen %>">
                         </div>
-
-                        <div class="col-6 mb-3">
-                            <label class="form-label fw-bold">Giá nhập (VND)</label>
-                            <input type="number" id="inputGiaNhap" name="GiaNhapVao"
-                                class="form-control text-danger fw-bold" required>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-muted small"><i class="bi bi-calendar-check"></i> Ngày
+                                lập phiếu</label>
+                            <input type="text" class="form-control bg-white fst-italic border-0 shadow-sm"
+                                value="Hệ thống tự động ghi nhận lúc Lưu" disabled>
                         </div>
                     </div>
 
-                    <div class="text-center mt-3">
-                        <button type="submit" class="btn btn-primary px-5 fw-bold">Xác nhận nhập kho</button>
-                        <a href="/dienthoai" class="btn btn-danger">Hủy</a>
+                    <div class="bg-white p-4 rounded-3 shadow-sm border border-primary border-opacity-25 mb-4">
+                        <h6 class="fw-bold text-primary border-bottom pb-2 mb-3">
+                            <i class="bi bi-box-seam"></i> Chi tiết hàng hóa
+                        </h6>
+
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Mã Phiếu Nhập (Tự động)</label>
+                                <input type="text" name="MaPhieuNhap"
+                                    class="form-control border-primary bg-light fw-bold text-danger fs-5"
+                                    value="<%= maPhieuTuDong %>" readonly>
+                            </div>
+
+                            <div class="col-md-8">
+                                <label class="form-label fw-bold">Chọn sản phẩm liên kết (Trong kho)</label>
+                                <select name="MaDienThoai" class="form-select border-primary shadow-sm" required>
+                                    <option value="">-- Click để chọn điện thoại --</option>
+                                    <% dienthoai.forEach(dt=> { %>
+                                        <option value="<%= dt._id %>">
+                                            <%= dt.TenDT %>
+                                        </option>
+                                        <% }) %>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold">Tên SP + Phân loại (Dùng để hiển thị)</label>
+                                <input type="text" name="TenDienThoai" class="form-control border-primary"
+                                    placeholder="VD: Google Pixel 9 Pro (128GB - Obsidian)" required>
+                                <small class="text-muted fst-italic">Lưu ý: Viết đúng định dạng Tên máy (Dung lượng -
+                                    Màu sắc)</small>
+                            </div>
+                        </div>
+
+                        <div class="row align-items-end">
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold text-success">Số lượng nhập</label>
+                                <input type="number" id="inputSoLuong" name="SoLuongNhap"
+                                    class="form-control form-control-lg border-success text-success fw-bold" min="1"
+                                    value="1" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold text-danger">Giá nhập 1 SP (VNĐ)</label>
+                                <input type="number" id="inputGiaNhap" name="GiaNhapVao"
+                                    class="form-control form-control-lg border-danger text-danger fw-bold" min="0"
+                                    placeholder="0" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold text-primary">Tổng tiền thanh toán</label>
+                                <div class="form-control form-control-lg bg-primary bg-opacity-10 text-primary fw-bold text-end border-0"
+                                    id="hienThiTongTien">
+                                    0 đ
+                                </div>
+                            </div>
+                        </div>
                     </div>
+
+                    <div class="text-center mt-2">
+                        <button type="submit" class="btn btn-primary px-5 py-2 fw-bold fs-5 shadow-sm">
+                            <i class="bi bi-check-circle"></i> Xác nhận nhập kho
+                        </button>
+                        <a href="/phieunhap" class="btn btn-secondary px-4 py-2 ms-3 fw-bold shadow-sm">
+                            <i class="bi bi-x-circle"></i> Hủy
+                        </a>
+                    </div>
+
                 </form>
             </div>
         </div>
     </div>
 
     <script>
-        function updatePrice() {
-            var select = document.getElementById("selectPhone");
-            var selectedOption = select.options[select.selectedIndex];
+        const soLuong = document.getElementById('inputSoLuong');
+        const giaNhap = document.getElementById('inputGiaNhap');
+        const tongTien = document.getElementById('hienThiTongTien');
 
-            // Lấy giá từ data-price của option được chọn
-            var price = selectedOption.getAttribute("data-price");
-
-            // Điền vào ô input Giá nhập
-            var priceInput = document.getElementById("inputGiaNhap");
-            priceInput.value = price;
-
-            // Hiệu ứng nhỏ: Nháy màu để người dùng biết giá đã thay đổi
-            priceInput.style.backgroundColor = "#fff3cd";
-            setTimeout(() => { priceInput.style.backgroundColor = "#fff"; }, 500);
+        function tinhTien() {
+            let sl = parseFloat(soLuong.value) || 0;
+            let gia = parseFloat(giaNhap.value) || 0;
+            let ketQua = sl * gia;
+            tongTien.innerText = ketQua.toLocaleString('vi-VN') + ' đ';
         }
+
+        soLuong.addEventListener('input', tinhTien);
+        giaNhap.addEventListener('input', tinhTien);
     </script>

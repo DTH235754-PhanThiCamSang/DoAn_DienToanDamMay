@@ -8,7 +8,7 @@ const donHangSchema = new mongoose.Schema({
     ChiTiet: [{
         SanPham: { type: mongoose.Schema.Types.ObjectId, ref: 'DienThoai' },
         SoLuong: Number,
-        GiaLucMua: Number // Phải lưu giá lúc mua, lỡ sau này điện thoại tăng/giảm giá
+        GiaLucMua: Number // Phải lưu giá lúc mua,
     }],
     TongTien: Number,
     PhuongThucThanhToan: String, // 'COD' hoặc 'VietQR'

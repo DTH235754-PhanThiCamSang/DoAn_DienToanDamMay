@@ -36,23 +36,23 @@ router.get('/dangky', (req, res) => {
 
 router.post('/dangky', async (req, res) => {
     try {
-        // 🔥 Đã lấy đủ 5 thông tin, bao gồm cả Email và Xác nhận mật khẩu
+        // lấy đủ 5 thông tin
         var { HoVaTen, Email, TenDangNhap, MatKhau, XacNhanMatKhau } = req.body;
         
-        // 1. Kiểm tra 2 mật khẩu có khớp nhau không
+        // Kiểm tra 2 mật khẩu có khớp nhau không
         if (MatKhau !== XacNhanMatKhau) {
             req.session.error = 'Mật khẩu xác nhận không khớp!';
             return res.redirect('/auth/dangky');
         }
 
-        // 2. Kiểm tra tên đăng nhập đã tồn tại chưa
+        // Kiểm tra tên đăng nhập đã tồn tại chưa
         var existingUser = await TaiKhoan.findOne({ TenDangNhap: TenDangNhap });
         if (existingUser) {
             req.session.error = 'Tên đăng nhập này đã có người sử dụng!';
             return res.redirect('/auth/dangky');
         }
 
-        // 3. Tạo tài khoản mới
+        // Tạo tài khoản mới
         var newUser = new TaiKhoan({
             HoVaTen: HoVaTen,
             Email: Email,

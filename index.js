@@ -26,8 +26,8 @@ const thanhtoanRouter = require('./routers/thanhtoan');
 // ==========================================
 const uri = process.env.MONGODB_URI || 'mongodb://admin:admin123@ac-aon9t0v-shard-00-01.jxjblx7.mongodb.net:27017/CH_DienThoai?ssl=true&authSource=admin';
 mongoose.connect(uri)
-    .then(() => console.log('✅ Kết nối MongoDB thành công!'))
-    .catch(err => console.log('❌ Lỗi kết nối MongoDB: ' + err));
+    .then(() => console.log('Kết nối MongoDB thành công!'))
+    .catch(err => console.log('Lỗi kết nối MongoDB: ' + err));
 
 // ==========================================
 // 3. CẤU HÌNH VIEW ENGINE & BỘ ĐỌC DỮ LIỆU
@@ -72,24 +72,20 @@ passport.use(new GoogleStrategy({
   },
   async function(accessToken, refreshToken, profile, done) {
     try {
-        // 1. Kiểm tra xem người này từng đăng nhập Google vào web mình chưa
-        // Mình sẽ dùng ID của Google làm TenDangNhap luôn cho khỏi trùng
         let user = await TaiKhoan.findOne({ TenDangNhap: profile.id });
 
         if (!user) {
-            // 2. Nếu tìm không thấy -> Tài khoản mới -> Lưu vào MongoDB
             user = new TaiKhoan({
                 HoVaTen: profile.displayName,
                 TenDangNhap: profile.emails[0].value, 
-                MatKhau: profile.id, // Mật khẩu để tạm là ID luôn vì họ xài Google rồi
-				Email: profile.emails[0].value,
+                MatKhau: profile.id, 
+                Email: profile.emails[0].value,
                 QuyenHan: 'user'
             });
             await user.save();
             console.log("Đã lưu tài khoản Google mới vào CSDL!");
         }
 
-        // 3. Trả thông tin user (đã có trong DB) đi tiếp
         return done(null, user);
         
     } catch (err) {
@@ -104,6 +100,10 @@ passport.use(new GoogleStrategy({
 app.use((req, res, next) => {
     res.locals.session = req.session;
     
+    //
+    // Nếu có đăng nhập thì lấy quyền của người đó, nếu khách vãng lai thì gán là 'khach'
+    res.locals.QuyenHan = (req.session && req.session.QuyenHan) ? req.session.QuyenHan : 'khach';
+    
     res.locals.errorMessage = req.session.error;
     res.locals.successMessage = req.session.success;
     
@@ -117,7 +117,7 @@ app.use((req, res, next) => {
 // 7. ĐĂNG KÝ CÁC ĐƯỜNG DẪN (ROUTES)
 // ==========================================
 app.use('/', indexRouter);
-app.use('/auth', authRouter); // Dùng 1 tiền tố /auth cho gọn
+app.use('/auth', authRouter); 
 app.use('/taikhoan', taikhoanRouter);
 app.use('/hangsanxuat', hangsanxuatRouter);
 app.use('/dienthoai', dienthoaiRouter);

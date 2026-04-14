@@ -1,119 +1,123 @@
 <%- include('navbar') %>
 
-    <div class="container my-5">
-        <div class="row justify-content-center">
-            <div class="col-md-8 col-lg-6">
-                <div class="card shadow-sm border-0">
-                    <div class="card-header bg-primary text-white text-center py-3">
-                        <h4 class="mb-0 fw-bold">THANH TOÁN ĐƠN HÀNG</h4>
-                    </div>
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white text-center py-3">
+                    <h4 class="mb-0 fw-bold">THANH TOÁN ĐƠN HÀNG</h4>
+                </div>
 
-                    <div class="card-body p-4">
-                        <form action="/thanhtoan/xuly" method="POST">
-                            <h5 class="mb-3 border-bottom pb-2"><i class="bi bi-person-lines-fill me-2"></i>Thông tin
-                                nhận hàng</h5>
+                <div class="card-body p-4">
+                    <form action="/thanhtoan/xuly" method="POST">
+                        
+                        <% danhSachMua.forEach(sp => { %>
+                            <input type="hidden" name="buy_ids" value="<%= sp.idDT || sp.Id %>">
+                            <input type="hidden" name="buy_dls" value="<%= sp.DungLuong %>">
+                            <input type="hidden" name="buy_mss" value="<%= sp.MauSac %>">
+                        <% }) %>
 
-                            <div class="mb-3">
-                                <label class="form-label">Họ và tên</label>
-                                <input type="text" name="HoVaTen" class="form-control" value="<%= session.HoVaTen %>"
-                                    required placeholder="Nhập họ tên người nhận">
-                            </div>
+                        <h5 class="mb-3 border-bottom pb-2"><i class="bi bi-person-lines-fill me-2"></i>Thông tin nhận hàng</h5>
 
-                            <div class="mb-3">
-                                <label class="form-label">Số điện thoại</label>
-                                <input type="tel" name="SoDienThoai" class="form-control" required
-                                    placeholder="Nhập số điện thoại liên lạc">
-                            </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Họ và tên</label>
+                            <input type="text" name="HoVaTen" class="form-control" value="<%= session.HoVaTen %>" required>
+                        </div>
 
-                            <div class="mb-3">
-                                <label class="form-label">Địa chỉ nhận hàng</label>
-                                <textarea name="DiaChi" class="form-control" rows="3" required
-                                    placeholder="Số nhà, tên đường, phường/xã..."></textarea>
-                            </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Số điện thoại</label>
+                            <input type="tel" name="SoDienThoai" class="form-control" required placeholder="09xxxxxxx">
+                        </div>
 
-                            <h5 class="mt-4 mb-3 border-bottom pb-2"><i class="bi bi-cart-check me-2"></i>Sản phẩm thanh
-                                toán</h5>
-                            <% danhSachMua.forEach(sp=> { %>
-                                <div class="border-bottom pb-3 mb-3">
-                                    <div class="row align-items-center">
-                                        <div class="col-7">
-                                            <div class="fw-bold text-primary">
-                                                <%= sp.TenDT %>
-                                            </div>
-                                            <small class="text-muted">Phân loại: <%= sp.MauSac %> - <%= sp.DungLuong %>
-                                            </small>
-                                            <div class="mt-1">
-                                                <button type="button"
-                                                    class="btn btn-link text-danger p-0 small text-decoration-none"
-                                                    onclick="xoaSP('<%= sp.Id %>')">
-                                                    <i class="bi bi-trash"></i> Xóa món này
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <div class="col-5 text-end">
-                                            <div class="input-group input-group-sm mb-2 ms-auto" style="width: 100px;">
-                                                <button class="btn btn-outline-secondary" type="button"
-                                                    onclick="doiSoLuong('<%= sp.Id %>', -1)">-</button>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Địa chỉ nhận hàng</label>
+                            <textarea name="DiaChi" class="form-control" rows="2" required placeholder="Số nhà, tên đường..."></textarea>
+                        </div>
 
-                                                <input type="text" class="form-control text-center bg-white"
-                                                    value="<%= sp.SoLuong %>" readonly>
-
-                                                <button class="btn btn-outline-secondary" type="button"
-                                                    onclick="doiSoLuong('<%= sp.Id %>', 1)">+</button>
-                                            </div>
-
-                                            <div class="text-danger fw-bold">
-                                                <%= (sp.Gia * sp.SoLuong).toLocaleString('vi-VN') %>đ
-                                            </div>
-                                        </div>
+                        <h5 class="mt-4 mb-3 border-bottom pb-2"><i class="bi bi-cart-check me-2"></i>Sản phẩm thanh toán</h5>
+                        <% danhSachMua.forEach(sp => { %>
+                            <div class="border-bottom pb-2 mb-2">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="fw-bold text-primary small"><%= sp.TenDT %></div>
+                                        <small class="text-muted"><%= sp.MauSac %> - <%= sp.DungLuong %> (x<%= sp.SoLuong %>)</small>
+                                    </div>
+                                    <div class="text-danger fw-bold small">
+                                        <%= (sp.GiaBan * sp.SoLuong).toLocaleString('vi-VN') %>đ
                                     </div>
                                 </div>
-                                <% }) %>
+                            </div>
+                        <% }) %>
 
-                                    <h5 class="mt-4 mb-3 border-bottom pb-2"><i class="bi bi-wallet2 me-2"></i>Phương
-                                        thức thanh
-                                        toán</h5>
+                        <h5 class="mt-4 mb-3 border-bottom pb-2"><i class="bi bi-wallet2 me-2"></i>Phương thức thanh toán</h5>
 
-                                    <div class="form-check border p-3 rounded mb-2">
-                                        <input class="form-check-input ms-0 me-2" type="radio" name="PhuongThucTT"
-                                            id="qr" value="QR" checked>
-                                        <label class="form-check-label d-flex align-items-center" for="qr">
-                                            <i class="bi bi-qr-code-scan me-2 text-primary fs-5"></i> Quét mã QR (Chuyển
-                                            khoản)
-                                        </label>
-                                    </div>
+                        <div class="form-check border p-3 rounded mb-2">
+                            <input class="form-check-input ms-0 me-2" type="radio" name="PhuongThucTT" id="qr" value="QR" checked>
+                            <label class="form-check-label d-flex align-items-center" for="qr">
+                                <i class="bi bi-qr-code-scan me-2 text-primary fs-5"></i> Quét mã QR (Chuyển khoản)
+                            </label>
+                        </div>
 
-                                    <div class="form-check border p-3 rounded mb-3">
-                                        <input class="form-check-input ms-0 me-2" type="radio" name="PhuongThucTT"
-                                            id="cod" value="COD">
-                                        <label class="form-check-label d-flex align-items-center" for="cod">
-                                            <i class="bi bi-cash-stack me-2 text-success fs-5"></i> Thanh toán tiền mặt
-                                            khi nhận
-                                            hàng
-                                        </label>
-                                    </div>
+                        <div id="vietqr-area" class="text-center mt-3 p-3 border rounded bg-light d-none">
+                            <p class="fw-bold text-primary small">Mã QR Thanh Toán TPBank</p>
+                            <img id="img-qr" src="" alt="VietQR" class="img-fluid border shadow-sm mb-2" style="max-width: 200px;">
+                            <div class="small text-muted">Nội dung: <span class="fw-bold text-dark">SPhone <%= Date.now() %></span></div>
+                        </div>
 
-                                    <div
-                                        class="alert alert-warning d-flex justify-content-between align-items-center mt-4 mb-4">
-                                        <span class="fw-bold fs-5">TỔNG THANH TOÁN:</span>
-                                        <span class="fw-bold fs-4 text-danger">
-                                            <%= tongTien.toLocaleString('vi-VN') %>đ
-                                        </span>
-                                    </div>
+                        <div class="form-check border p-3 rounded mb-3 mt-2">
+                            <input class="form-check-input ms-0 me-2" type="radio" name="PhuongThucTT" id="cod" value="COD">
+                            <label class="form-check-label d-flex align-items-center" for="cod">
+                                <i class="bi bi-cash-stack me-2 text-success fs-5"></i> Thanh toán tiền mặt khi nhận hàng
+                            </label>
+                        </div>
 
-                                    <div class="d-grid gap-2">
-                                        <button type="submit" class="btn btn-primary btn-lg fw-bold shadow-sm">
-                                            <i class="bi bi-check-circle me-2"></i>XÁC NHẬN THANH TOÁN
-                                        </button>
-                                        <a href="/" class="btn btn-outline-secondary">
-                                            <i class="bi bi-arrow-left me-2"></i>Tiếp tục mua sắm
-                                        </a>
-                                    </div>
-                        </form>
-                    </div>
+                        <div class="alert alert-warning d-flex justify-content-between align-items-center mt-4 mb-4">
+                            <span class="fw-bold">TỔNG TIỀN:</span>
+                            <h4 class="text-danger fw-bold mb-0"><%= tongTien.toLocaleString('vi-VN') %>đ</h4>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg fw-bold shadow-sm">
+                                <i class="bi bi-check-circle me-2"></i>XÁC NHẬN THANH TOÁN
+                            </button>
+                            <a href="/" class="btn btn-outline-secondary btn-sm">Quay lại mua sắm</a>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <%- include('footer') %>
+<script>
+    function generateQR() {
+        const amount = <%= tongTien %>;
+        const bankId = "TPBank";
+        const accountNo = "68838683883";
+        const accountName = "PHAN THI CAM SANG";
+        const info = "Thanh toan don hang SPhone";
+
+        const qrUrl = `https://img.vietqr.io/image/${bankId}-${accountNo}-compact2.png?amount=${amount}&addInfo=${info}&accountName=${accountName}`;
+
+        document.getElementById('img-qr').src = qrUrl;
+        document.getElementById('vietqr-area').classList.remove('d-none');
+    }
+
+    window.onload = function () {
+        if (document.getElementById('qr').checked) {
+            generateQR();
+        }
+    };
+
+    document.querySelectorAll('input[name="PhuongThucTT"]').forEach(radio => {
+        radio.addEventListener('change', function () {
+            if (this.value === 'QR') {
+                generateQR();
+            } else {
+                document.getElementById('vietqr-area').classList.add('d-none');
+            }
+        });
+    });
+</script>
+
+<%- include('footer') %>

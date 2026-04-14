@@ -5,7 +5,7 @@ var taiKhoanSchema = new mongoose.Schema({
 	TenDangNhap: { type: String, unique: true, required: true },
 	MatKhau: { type: String, required: true },
 	Email: { type: String, required: true },
-	QuyenHan: { type: String, default: 'user' } // admin hoặc user
+	QuyenHan: { type: String, enum: ['user', 'admin', 'thukho', 'banhang'], default: 'user' }
 });
 
 module.exports = mongoose.model('TaiKhoan', taiKhoanSchema);

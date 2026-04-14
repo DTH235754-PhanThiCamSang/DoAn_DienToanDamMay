@@ -1,6 +1,7 @@
 var mongoose = require('mongoose');
+const phieuNhapSchema = new mongoose.Schema({
+    MaPhieuNhap: { type: String, required: true },
 
-var phieuNhapSchema = new mongoose.Schema({
     MaDienThoai: { type: mongoose.Schema.Types.ObjectId, ref: 'DienThoai' },
     TenDienThoai: { type: String },
     NgayNhap: { type: Date, default: Date.now },

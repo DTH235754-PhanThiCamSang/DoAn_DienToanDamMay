@@ -65,4 +65,88 @@ router.get('/', async (req, res, next) => {
         next(error);
     }
 });
+// ==========================================
+// MỞ TRANG THÊM TÀI KHOẢN MỚI
+// ==========================================
+router.get('/them', (req, res) => {
+    res.render('taikhoan_them', { title: 'Thêm tài khoản mới' });
+});
+
+// ==========================================
+// XỬ LÝ LƯU TÀI KHOẢN MỚI VÀO DATABASE
+// ==========================================
+router.post('/them', async (req, res, next) => {
+    try {
+        const { TenDangNhap, MatKhau, HoVaTen, Email, QuyenHan } = req.body;
+
+        // 1. Kiểm tra xem Tên đăng nhập này có ai xài chưa
+        const checkTaiKhoan = await TaiKhoan.findOne({ TenDangNhap: TenDangNhap });
+        if (checkTaiKhoan) {
+            req.session.error = "Tên đăng nhập này đã tồn tại, vui lòng chọn tên khác!";
+            return res.redirect('/taikhoan/them'); // Bị trùng thì đuổi về trang thêm
+        }
+
+        // 2. Gom dữ liệu lại thành 1 tài khoản mới
+        const taiKhoanMoi = new TaiKhoan({
+            TenDangNhap: TenDangNhap,
+            MatKhau: MatKhau, 
+            HoVaTen: HoVaTen,
+            Email: Email,
+            QuyenHan: QuyenHan
+        });
+
+        // 3. Lưu cái rụp vào CSDL
+        await taiKhoanMoi.save();
+        
+        // 4. Báo thành công và quay về danh sách
+        req.session.success = "Đã thêm tài khoản mới thành công!";
+        res.redirect('/taikhoan');
+
+    } catch (error) {
+        next(error);
+    }
+});
+// ==========================================
+// MỞ TRANG SỬA TÀI KHOẢN
+// ==========================================
+router.get('/sua/:id', async (req, res, next) => {
+    try {
+        // Tìm tài khoản theo ID gửi trên thanh địa chỉ
+        const thongTinTaiKhoan = await TaiKhoan.findById(req.params.id);
+        
+        if (!thongTinTaiKhoan) {
+            return res.status(404).send("Không tìm thấy tài khoản này!");
+        }
+
+        // Gọi giao diện và truyền dữ liệu sang
+        res.render('taikhoan_sua', { 
+            title: 'Sửa thông tin tài khoản',
+            taikhoan: thongTinTaiKhoan 
+        });
+    } catch (error) {
+        next(error);
+    }
+});
+
+// ==========================================
+// XỬ LÝ LƯU DỮ LIỆU KHI BẤM NÚT LƯU
+// ==========================================
+router.post('/sua/:id', async (req, res, next) => {
+    try {
+        const id = req.params.id;
+        const { HoVaTen, Email, QuyenHan } = req.body;
+
+        // Cập nhật thông tin vào Database (Thường thì tên đăng nhập không cho sửa)
+        await TaiKhoan.findByIdAndUpdate(id, {
+            HoVaTen: HoVaTen,
+            Email: Email,
+            QuyenHan: QuyenHan
+        });
+
+        // Sửa xong quay về trang danh sách tài khoản
+        res.redirect('/taikhoan'); 
+    } catch (error) {
+        next(error);
+    }
+});
 module.exports = router;

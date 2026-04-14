@@ -1,119 +1,194 @@
-
 <%- include('navbar') %>
-
-<script id="data-phienban" type="application/json">
-    <%- JSON.stringify(dienthoai.CacPhienBan || []) %>
-</script>
-
-<div class="container mt-4">
-    <div class="row">
-        <div class="col-md-5">
-            <div class="text-center mb-4 card shadow-sm p-3">
-                <img src="<%= dienthoai.HinhAnh %>" class="img-fluid rounded" alt="Product">
+    <div class="container mt-4 mb-5">
+        <div class="row bg-white p-4 rounded shadow-sm">
+            <div class="col-md-5 text-center">
+                <img id="anhChinh" src="<%= dienthoai.HinhAnh %>" alt="<%= dienthoai.TenDT %>" class="img-fluid rounded" style="max-height: 500px; object-fit: contain;">
             </div>
 
-            <div class="card shadow-sm p-3">
-                <h5 class="fw-bold border-bottom pb-2">Mô tả chi tiết:</h5>
-                <div id="descriptionContent" class="description-collapsed">
-                    <%- dienthoai.MoTa %>
+            <div class="col-md-7">
+                <h2 class="fw-bold"><%= dienthoai.TenDT %></h2>
+                <p class="text-muted">Hãng sản xuất: <span class="fw-bold text-dark"><%= dienthoai.HangSanXuat ? dienthoai.HangSanXuat.TenHang : 'Đang cập nhật' %></span></p>
+
+                <div class="bg-light p-3 rounded mb-3">
+                    <h3 id="giaHienThi" class="text-danger fw-bold mb-0">Vui lòng chọn phiên bản</h3>
+                    <small id="trangThaiKho" class="text-muted mt-1 d-block"></small>
                 </div>
-                <button id="btnToggleDesc" class="btn btn-link p-0 text-decoration-none mt-2">Xem thêm ▼</button>
+
+                <div id="duLieuPhienBan" data-json="<%= JSON.stringify(dienthoai.CacPhienBan || []) %>" style="display: none;"></div>
+
+                <div class="mb-3">
+                    <label class="fw-bold mb-2">Chọn dung lượng:</label>
+                    <div id="khuVucDungLuong" class="d-flex flex-wrap gap-2">
+                        </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="fw-bold mb-2">Chọn màu:</label>
+                    <div id="khuVucMauSac" class="d-flex flex-wrap gap-2">
+                        </div>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button class="btn btn-success flex-grow-1 fw-bold py-2" id="btnMuaNgay" disabled>
+                        MUA NGAY
+                    </button>
+                    <button class="btn btn-danger flex-grow-1 fw-bold py-2" id="btnThemGioHang" disabled>
+                        <i class="bi bi-cart-plus"></i> THÊM VÀO GIỎ HÀNG
+                    </button>
+                </div>
+                <div class="mt-2 text-center">
+                    <a href="/" class="btn btn-light w-100 border">Quay lại trang chủ</a>
+                </div>
             </div>
         </div>
 
-        <div class="col-md-7 px-4">
-            <h1 class="fw-bold" id="productTitle">
-                <%= dienthoai.TenDT %>
-            </h1>
-            <p class="text-muted">Hãng: <strong>
-                    <%= dienthoai.HangSanXuat ? dienthoai.HangSanXuat.TenHang : 'Chưa cập nhật' %>
-                </strong></p>
-
-            <div id="priceArea">
-                <h3 class="text-danger fw-bold my-3" id="hienThiGia">Đang tính toán giá...</h3>
-                <p id="giaGocArea" class="text-decoration-line-through text-muted small mb-3" style="display:none;">
-                </p>
-            </div>
-
-            <div class="mb-4">
-                <label class="fw-bold small d-block mb-2">Chọn dung lượng:</label>
-                <div class="d-flex gap-2" id="dungLuongGroup">
-                    <% let dsDL=[...new Set((dienthoai.CacPhienBan || []).map(p=> p.DungLuong))];
-                        dsDL.forEach((dl, index) => {
-                        %>
-                        <button
-                            class="btn <%= index === 0 ? 'btn-primary' : 'btn-outline-primary' %> px-4 variant-btn"
-                            data-type="dungluong" data-value="<%= dl %>">
-                            <%= dl %>
-                        </button>
-                        <% }) %>
-                </div>
-            </div>
-
-            <div class="mb-4">
-                <label class="fw-bold small d-block mb-2">Chọn màu:</label>
-                <div class="d-flex gap-2" id="mauSacGroup">
-                    <% let dsMau=[...new Set((dienthoai.CacPhienBan || []).map(p=> p.MauSac))];
-                        dsMau.forEach((mau, index) => {
-                        %>
-                        <button
-                            class="btn btn-light border rounded-pill px-3 py-1 variant-btn <%= index === 0 ? 'border-primary border-2 fw-bold text-primary' : '' %>"
-                            data-type="mausac" data-value="<%= mau %>">
-                            <%= mau %>
-                        </button>
-                        <% }) %>
-                </div>
-            </div>
-
-            <hr>
-
-            <div class="d-flex gap-2 mt-3">
-                <button id="btnMuaNgay" data-id="<%= dienthoai._id %>"
-                    class="btn btn-success fw-bold px-4 py-2 flex-grow-1">
-                    MUA NGAY
-                </button>
-
-                <button id="btnThemVaoGio" data-id="<%= dienthoai._id %>"
-                    class="btn btn-danger fw-bold px-4 py-2 flex-grow-1">
-                    <i class="bi bi-cart-plus"></i> THÊM VÀO GIỎ HÀNG
-                </button>
-            </div>
-
-            <div class="mt-3">
-                <a href="/" class="btn btn-light w-100 border">Quay lại trang chủ</a>
+        <div class="row mt-4">
+            <div class="col-12 bg-white p-4 rounded shadow-sm">
+                <h4 class="fw-bold border-bottom pb-2">Mô tả chi tiết</h4>
+                <p style="white-space: pre-line;"><%= dienthoai.MoTa %></p>
             </div>
         </div>
     </div>
-</div>
 
-<style>
-    .description-collapsed {
-        max-height: 250px;
-        overflow: hidden;
-        position: relative;
-        transition: max-height 0.4s ease;
-    }
+    <script>
+        // 1. Lấy dữ liệu và các phần tử
+        const theDuLieu = document.getElementById('duLieuPhienBan').getAttribute('data-json');
+        const danhSachPhienBan = JSON.parse(theDuLieu);
 
-    .description-collapsed::after {
-        content: "";
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        height: 60px;
-        background: linear-gradient(transparent, white);
-    }
+        const khuVucDungLuong = document.getElementById('khuVucDungLuong');
+        const khuVucMauSac = document.getElementById('khuVucMauSac');
+        const giaHienThi = document.getElementById('giaHienThi');
+        const trangThaiKho = document.getElementById('trangThaiKho');
+        const anhChinh = document.getElementById('anhChinh');
+        
+        const btnMuaNgay = document.getElementById('btnMuaNgay');
+        const btnThemGioHang = document.getElementById('btnThemGioHang');
+        const linkAnhGoc = anhChinh.src;
 
-    .description-expanded {
-        max-height: 5000px;
-    }
+        let dungLuongDangChon = null;
+        let mauSacDangChon = null;
 
-    .description-expanded::after {
-        display: none;
-    }
-</style>
-<script>
-    const SP_TEN_GOC = "<%= dienthoai.TenDT %>";
-    const SP_GIA_NHAP = Number("<%= dienthoai.GiaNhap || 0 %>");
-</script>
-<script src="/script.js"></script>
+        const cacDungLuong = [...new Set(danhSachPhienBan.map(pb => pb.DungLuong))];
+
+        function veNutDungLuong() {
+            khuVucDungLuong.innerHTML = '';
+            cacDungLuong.forEach(dl => {
+                const btn = document.createElement('button');
+                btn.className = `btn btn-sm ${dl === dungLuongDangChon ? 'btn-danger' : 'btn-outline-secondary'}`;
+                btn.innerText = dl;
+                btn.onclick = () => {
+                    dungLuongDangChon = dl;
+                    mauSacDangChon = null; 
+                    veNutDungLuong();
+                    veNutMauSac();
+                    capNhatGiaTien();
+                };
+                khuVucDungLuong.appendChild(btn);
+            });
+        }
+
+        function veNutMauSac() {
+            khuVucMauSac.innerHTML = '';
+            if (!dungLuongDangChon) return;
+
+            const cacMauCuaDungLuong = danhSachPhienBan
+                .filter(pb => pb.DungLuong.trim() === dungLuongDangChon.trim())
+                .map(pb => pb.MauSac);
+
+            cacMauCuaDungLuong.forEach(mau => {
+                const btn = document.createElement('button');
+                btn.className = `btn btn-sm ${mau === mauSacDangChon ? 'btn-primary' : 'btn-outline-primary'}`;
+                btn.innerText = mau;
+                btn.onclick = () => {
+                    mauSacDangChon = mau;
+                    veNutMauSac();
+                    capNhatGiaTien();
+                };
+                khuVucMauSac.appendChild(btn);
+            });
+        }
+
+        function capNhatGiaTien() {
+            if (!dungLuongDangChon || !mauSacDangChon) {
+                giaHienThi.innerText = "Vui lòng chọn Dung lượng và Màu sắc";
+                btnMuaNgay.disabled = true;
+                btnThemGioHang.disabled = true;
+                return;
+            }
+
+            // Tìm phiên bản (Dùng trim để loại bỏ khoảng trắng dư thừa)
+            const phienBanChinhXac = danhSachPhienBan.find(
+                pb => pb.DungLuong.trim() === dungLuongDangChon.trim() && 
+                      pb.MauSac.trim() === mauSacDangChon.trim()
+            );
+
+            if (phienBanChinhXac) {
+                giaHienThi.innerText = Number(phienBanChinhXac.GiaBan).toLocaleString('vi-VN') + ' VNĐ';
+                
+                if (phienBanChinhXac.HinhAnhPhienBan) {
+                    anhChinh.src = phienBanChinhXac.HinhAnhPhienBan;
+                } else {
+                    anhChinh.src = linkAnhGoc;
+                }
+
+                // 🔥 QUAN TRỌNG: Mở khóa nút bấm
+                let tonKho = parseInt(phienBanChinhXac.SoLuongTon) || 0;
+                if (tonKho > 0) {
+                    trangThaiKho.innerHTML = `<i class="bi bi-check-circle-fill text-success"></i> Còn hàng (${tonKho} sản phẩm)`;
+                    btnMuaNgay.disabled = false;     // Gỡ bỏ disabled
+                    btnThemGioHang.disabled = false; // Gỡ bỏ disabled
+                } else {
+                    trangThaiKho.innerHTML = `<i class="bi bi-x-circle-fill text-danger"></i> Tạm hết hàng`;
+                    btnMuaNgay.disabled = true;
+                    btnThemGioHang.disabled = true;
+                }
+            }
+        }
+
+        // 🔥 XỬ LÝ SỰ KIỆN BẤM NÚT
+        function xuLyThemGioHang(laMuaNgay = false) {
+            const phienBan = danhSachPhienBan.find(
+                pb => pb.DungLuong === dungLuongDangChon && pb.MauSac === mauSacDangChon
+            );
+
+            const data = {
+                idDT: '<%= dienthoai._id %>',
+                TenDT: '<%= dienthoai.TenDT %>',
+                DungLuong: dungLuongDangChon,
+                MauSac: mauSacDangChon,
+                GiaBan: phienBan.GiaBan,
+                HinhAnh: phienBan.HinhAnhPhienBan || linkAnhGoc
+            };
+
+            fetch('/giohang/them', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(res => res.json())
+            .then(resData => {
+                if (resData.success) {
+                    document.getElementById('cart-badge').innerText = resData.tongSoLuong;
+                    if (laMuaNgay) {
+                        window.location.href = '/giohang'; // Mua ngay thì chuyển trang luôn
+                    } else {
+                        alert('Đã thêm vào giỏ hàng thành công!');
+                    }
+                }
+            });
+        }
+
+        btnThemGioHang.onclick = () => xuLyThemGioHang(false);
+        btnMuaNgay.onclick = () => xuLyThemGioHang(true);
+
+        // Khởi tạo
+        if (cacDungLuong.length > 0) {
+            dungLuongDangChon = cacDungLuong[0];
+            veNutDungLuong();
+            veNutMauSac();
+            const mauDau = danhSachPhienBan.find(p => p.DungLuong === dungLuongDangChon);
+            if(mauDau) mauSacDangChon = mauDau.MauSac;
+            veNutMauSac();
+            capNhatGiaTien();
+        }
+    </script>

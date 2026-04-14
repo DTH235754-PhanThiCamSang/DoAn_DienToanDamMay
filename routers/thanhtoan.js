@@ -3,238 +3,133 @@ const router = express.Router();
 const DonHang = require('../models/donhang');
 const SanPham = require('../models/dienthoai');
 
-// Hàm bổ trợ tính giá động (để không viết code cứng)
-function tinhGiaPhienBan(sp) {
-    if (sp.CacPhienBan && sp.CacPhienBan.length > 0) {
-        let pb = sp.CacPhienBan[0];
-        let giaNiemYet = sp.GiaNhap * (1 + (pb.PhanTramLoi || 0) / 100);
-        let giaSauGiam = giaNiemYet * (1 - (pb.PhanTramGiamGia || 0) / 100);
-        return Math.round(giaSauGiam / 10) * 10;
-    }
-    return 0;
-}
-
-// 1. Route hiển thị trang thanh toán
+// 1. HIỂN THỊ TRANG THANH TOÁN
 router.get('/', (req, res) => {
-    const danhSachMua = req.session.danhSachMua || [];
-    const tongTien = danhSachMua.reduce((sum, item) => sum + item.ThanhTien, 0);
+    let gioHang = req.session.gioHang || [];
     
+    // Lấy danh sách cần mua từ URL 
+    let ids = req.query.id ? (Array.isArray(req.query.id) ? req.query.id : [req.query.id]) : [];
+    let dls = req.query.dl ? (Array.isArray(req.query.dl) ? req.query.dl : [req.query.dl]) : [];
+    let mss = req.query.ms ? (Array.isArray(req.query.ms) ? req.query.ms : [req.query.ms]) : [];
+
+    let danhSachThanhToan = [];
+    
+    if (ids.length > 0) {
+        // Lọc từ giỏ hàng ra những món được chọn
+        danhSachThanhToan = gioHang.filter(item => 
+            ids.some((id, i) => id === item.idDT && dls[i] === item.DungLuong && mss[i] === item.MauSac)
+        );
+    } else {
+        // Nếu không có query (có thể đi từ nút Mua Ngay trực tiếp)
+        danhSachThanhToan = req.session.danhSachMua || [];
+    }
+
+    let tongTien = danhSachThanhToan.reduce((sum, item) => sum + (item.GiaBan * item.SoLuong), 0);
+
     res.render('thanhtoan', {
         title: 'Thanh toán đơn hàng',
-        danhSachMua: danhSachMua,
+        danhSachMua: danhSachThanhToan,
         tongTien: tongTien,
         session: req.session
     });
 });
 
-// // 2. Route Mua Ngay (Cộng dồn sản phẩm)
-// router.get('/muangay/:id', async (req, res) => {
-//     try {
-//         const idSanPham = req.params.id;
-//         const sp = await SanPham.findById(idSanPham);
-//         if (!sp) return res.status(404).send('Sản phẩm không tồn tại!');
-
-//         const giaBan = tinhGiaPhienBan(sp);
-//         let danhSachMua = req.session.danhSachMua || [];
-
-//         // Kiểm tra xem sản phẩm đã có trong danh sách chưa
-//         const index = danhSachMua.findIndex(item => item.Id == idSanPham);
-
-//         if (index !== -1) {
-//             // Nếu có rồi thì tăng số lượng
-//             danhSachMua[index].SoLuong += 1;
-//             danhSachMua[index].ThanhTien = danhSachMua[index].SoLuong * danhSachMua[index].Gia;
-//         } else {
-//             // Nếu chưa có thì thêm mới vào mảng
-//             danhSachMua.push({
-//                 Id: sp._id,
-//                 TenDT: sp.TenDT,
-//                 HinhAnh: sp.HinhAnh,
-//                 Gia: giaBan,
-//                 SoLuong: 1,
-//                 ThanhTien: giaBan
-//             });
-//         }
-
-//         req.session.danhSachMua = danhSachMua;
-//         res.redirect('/thanhtoan'); // Chuyển hướng về trang thanh toán chung
-
-//     } catch (error) {
-//         res.status(500).send("Lỗi server!");
-//     }
-// });
-router.get('/muangay/:id', async (req, res) => {
+// XỬ LÝ LƯU ĐƠN: TRỪ KHO & XÓA GIỎ HÀNG CÓ CHỌN LỌC
+router.post('/xuly', async (req, res) => {
     try {
-        const idSanPham = req.params.id;
-        const sp = await SanPham.findById(idSanPham);
-        if (!sp) return res.status(404).send('Sản phẩm không tồn tại!');
+        const { HoVaTen, SoDienThoai, DiaChi, PhuongThucTT, buy_ids, buy_dls, buy_mss } = req.body;
+        let gioHang = req.session.gioHang || [];
 
-        const giaBan = tinhGiaPhienBan(sp);
+        // Chuyển dữ liệu mua sang dạng mảng
+        let ids = Array.isArray(buy_ids) ? buy_ids : [buy_ids];
+        let dls = Array.isArray(buy_dls) ? buy_dls : [buy_dls];
+        let mss = Array.isArray(buy_mss) ? buy_mss : [buy_mss];
 
-        // KHÔNG DÙNG: let danhSachMua = req.session.danhSachMua || []; 
-        // MÀ HÃY TẠO MỚI HOÀN TOÀN ĐỂ XÓA SẠCH ĐỒ CŨ:
-        const danhSachMua = [{
-            Id: sp._id,
-            TenDT: sp.TenDT,
-            HinhAnh: sp.HinhAnh,
-            Gia: giaBan,
-            SoLuong: 1,
-            ThanhTien: giaBan
-        }];
+        // Lọc lấy danh sách những món THỰC SỰ thanh toán
+        let hangDaMua = gioHang.filter(item => 
+            ids.some((id, i) => id === item.idDT && dls[i] === item.DungLuong && mss[i] === item.MauSac)
+        );
 
-        // Ghi đè lại session (Xóa sạch những gì đã bấm trước đó)
-        req.session.danhSachMua = danhSachMua;
-        req.session.tongTien = giaBan;
+        // Nếu giỏ hàng trống (có thể khách dùng 'Mua Ngay' trực tiếp)
+        if (hangDaMua.length === 0 && req.session.danhSachMua) {
+            hangDaMua = req.session.danhSachMua;
+        }
 
-        res.redirect('/thanhtoan'); 
+        if (hangDaMua.length === 0) return res.status(400).send("Không có sản phẩm để thanh toán!");
 
-    } catch (error) {
-        console.error(error);
-        res.status(500).send("Lỗi server!");
+        // CẬP NHẬT DATABASE (Trừ SoLuongTon)
+        for (let item of hangDaMua) {
+            await SanPham.updateOne(
+                {
+                    _id: item.idDT || item.Id, // Check cả 2 cách đặt tên ID
+                    "CacPhienBan.DungLuong": item.DungLuong,
+                    "CacPhienBan.MauSac": item.MauSac
+                },
+                {
+                    $inc: { "CacPhienBan.$.SoLuongTon": -item.SoLuong }
+                }
+            );
+        }
+
+        // LƯU ĐƠN HÀNG VÀO DATABASE
+        const donHangMoi = new DonHang({
+            HoVaTen, SoDienThoai, DiaChi, PhuongThucTT,
+            ChiTietDonHang: hangDaMua,
+            TongTien: hangDaMua.reduce((sum, i) => sum + (i.GiaBan * i.SoLuong), 0)
+        });
+        await donHangMoi.save();
+
+        // XÓA CÓ CHỌN LỌC TRONG GIỎ HÀNG
+        // Chỉ xóa những món vừa mua xong
+        req.session.gioHang = gioHang.filter(item => 
+            !ids.some((id, i) => id === item.idDT && dls[i] === item.DungLuong && mss[i] === item.MauSac)
+        );
+        
+        // Xóa luôn túi tạm "Mua Ngay" nếu có
+        req.session.danhSachMua = null;
+
+        res.send(`
+            <div style="height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; font-family: sans-serif; text-align: center;">
+                <h1 style="color: #0d6efd;">SPhone đã nhận đơn hàng! Cảm ơn quý khách!</h1>
+                <p>Đơn hàng của bạn đang được xử lý nhanh nhất có thể.</p>
+                <a href="/" style="margin-top: 20px; text-decoration: none; padding: 12px 25px; background: #0d6efd; color: white; border-radius: 8px; font-weight: bold;">
+                    Quay lại trang chủ
+                </a>
+            </div>
+        `);
+    } catch (e) {
+        console.error("Lỗi:", e);
+        res.status(500).send("Lỗi xử lý: " + e.message);
     }
 });
-// 3. Route Mua Ngay bên trong trang chi tiết (Cộng dồn + Theo màu/dung lượng)
-// routers/thanhtoan.js
 
+// 3. MUA NGAY TỪ TRANG CHI TIẾT
 router.get('/muangay-chitiet/:id', async (req, res) => {
     try {
         const idSanPham = req.params.id;
-        const { mauSac, dungLuong } = req.query; 
+        const { mauSac, dungLuong } = req.query;
 
         const sp = await SanPham.findById(idSanPham);
         if (!sp) return res.status(404).send('Sản phẩm không tồn tại!');
 
-        // 1. Tìm đúng phiên bản để lấy giá
         const phienBan = sp.CacPhienBan.find(p => p.MauSac === mauSac && p.DungLuong === dungLuong);
         const giaBan = phienBan ? phienBan.GiaBan : sp.GiaBan;
 
-        // 2. BỎ CỘNG DỒN: Thay vì lấy danh sách cũ, ta tạo mới 100%
-        // Mỗi lần bấm Mua Ngay, túi hàng cũ sẽ bị đổ đi, chỉ chứa món mới này
-        const danhSachMua = [{
-            Id: sp._id,
+        // Lưu vào túi tạm 'danhSachMua' để sang trang thanh toán luôn
+        req.session.danhSachMua = [{
+            idDT: sp._id.toString(),
             TenDT: sp.TenDT,
             HinhAnh: sp.HinhAnh,
-            Gia: giaBan,
-            SoLuong: 1, // Luôn luôn là 1
-            ThanhTien: giaBan,
+            GiaBan: giaBan,
+            SoLuong: 1,
             MauSac: mauSac,
             DungLuong: dungLuong
         }];
 
-        // 3. Cập nhật lại Session (Lúc này túi chỉ có 1 món)
-        req.session.danhSachMua = danhSachMua;
-        req.session.tongTien = giaBan;
-
-        // 4. Chuyển hướng về trang thanh toán
-        res.redirect('/thanhtoan'); 
-
+        res.redirect('/thanhtoan');
     } catch (error) {
-        console.error(error);
         res.status(500).send("Lỗi server!");
     }
- });
-// // 3. Tăng số lượng (+1)
-// router.get('/tang/:id', (req, res) => {
-//     let danhSachMua = req.session.danhSachMua || [];
-//     const index = danhSachMua.findIndex(item => item.Id == req.params.id);
-//     if (index !== -1) {
-//         danhSachMua[index].SoLuong += 1;
-//         danhSachMua[index].ThanhTien = danhSachMua[index].SoLuong * danhSachMua[index].Gia;
-//     }
-//     res.redirect('/thanhtoan');
-// });
-
-// // 4. Giảm số lượng (-1)
-// router.get('/giam/:id', (req, res) => {
-//     let danhSachMua = req.session.danhSachMua || [];
-//     const index = danhSachMua.findIndex(item => item.Id == req.params.id);
-//     if (index !== -1) {
-//         danhSachMua[index].SoLuong -= 1;
-//         if (danhSachMua[index].SoLuong <= 0) {
-//             danhSachMua.splice(index, 1); // Xóa luôn nếu số lượng về 0
-//         } else {
-//             danhSachMua[index].ThanhTien = danhSachMua[index].SoLuong * danhSachMua[index].Gia;
-//         }
-//     }
-//     res.redirect('/thanhtoan');
-// });
-
-// // 5. Xóa sản phẩm khỏi danh sách
-// router.get('/xoa/:id', (req, res) => {
-//     let danhSachMua = req.session.danhSachMua || [];
-//     req.session.danhSachMua = danhSachMua.filter(item => item.Id != req.params.id);
-//     res.redirect('/thanhtoan');
-// });
-// // Hàm thay đổi số lượng dùng chung
-// function doiSoLuong(id, delta) {
-//     // Tự động nhận diện prefix dựa trên đường dẫn hiện tại
-//     const prefix = window.location.pathname.includes('thanhtoan') ? '/thanhtoan' : '/giohang';
-    
-//     if (delta > 0) {
-//         window.location.href = `${prefix}/tang/${id}`;
-//     } else {
-//         window.location.href = `${prefix}/giam/${id}`;
-//     }
-// }
-// 3. Tăng số lượng (+1)
-router.get('/tang/:id', (req, res) => {
-    let danhSachMua = req.session.danhSachMua || [];
-    const index = danhSachMua.findIndex(item => item.Id == req.params.id);
-    
-    if (index !== -1) {
-        danhSachMua[index].SoLuong += 1;
-        danhSachMua[index].ThanhTien = danhSachMua[index].SoLuong * danhSachMua[index].Gia;
-    }
-
-    // 🔥 Cần 2 dòng này để lưu và tính lại tiền
-    req.session.danhSachMua = danhSachMua;
-    req.session.tongTien = danhSachMua.reduce((total, item) => total + item.ThanhTien, 0);
-
-    res.redirect('/thanhtoan');
 });
 
-// 4. Giảm số lượng (-1)
-router.get('/giam/:id', (req, res) => {
-    let danhSachMua = req.session.danhSachMua || [];
-    const index = danhSachMua.findIndex(item => item.Id == req.params.id);
-    
-    if (index !== -1) {
-        if (danhSachMua[index].SoLuong > 1) {
-            danhSachMua[index].SoLuong -= 1;
-            danhSachMua[index].ThanhTien = danhSachMua[index].SoLuong * danhSachMua[index].Gia;
-        } else {
-            // Nếu bằng 1 mà bấm giảm nữa thì xóa luôn
-            danhSachMua.splice(index, 1);
-        }
-    }
-
-    // 🔥 Sáng đang thiếu dòng lưu này ở trong hình nè!
-    req.session.danhSachMua = danhSachMua;
-    req.session.tongTien = danhSachMua.reduce((total, item) => total + item.ThanhTien, 0);
-
-    res.redirect('/thanhtoan');
-});
-
-// 5. Xóa sản phẩm
-router.get('/xoa/:id', (req, res) => {
-    let danhSachMua = req.session.danhSachMua || [];
-    
-    // Lọc bỏ sản phẩm bị xóa
-    danhSachMua = danhSachMua.filter(item => item.Id != req.params.id);
-    
-    req.session.danhSachMua = danhSachMua;
-    req.session.tongTien = danhSachMua.reduce((total, item) => total + item.ThanhTien, 0);
-    
-    // Nếu xóa hết sạch đồ thì cho về trang chủ luôn
-    if (danhSachMua.length === 0) return res.redirect('/');
-    
-    res.redirect('/thanhtoan');
-});
-// Hàm xóa sản phẩm dùng chung
-function xoaSP(id) {
-    if (confirm('Sáng có chắc muốn bỏ sản phẩm này không?')) {
-        const prefix = window.location.pathname.includes('thanhtoan') ? '/thanhtoan' : '/giohang';
-        window.location.href = `${prefix}/xoa/${id}`;
-    }
-}
 module.exports = router;

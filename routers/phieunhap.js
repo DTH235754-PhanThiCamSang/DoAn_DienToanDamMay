@@ -1,48 +1,69 @@
-
 var express = require('express');
 var router = express.Router();
 var PhieuNhap = require('../models/phieunhap');
 var DienThoai = require('../models/dienthoai');
 
-// 1. Hiển thị form lập phiếu
-router.get('/them', async (req, res) => {
-    var dienthoai = await DienThoai.find();
-    res.render('phieunhap_them', { title: 'Nhập hàng', dienthoai: dienthoai });
-});
-
-// 2. Xử lý lưu phiếu và CẬP NHẬT GIÁ
-router.post('/them', async (req, res) => {
+// ==========================================
+// 1. MỞ TRANG THÊM PHIẾU NHẬP (Lấy mã tự động)
+// ==========================================
+router.get('/them', async (req, res, next) => {
     try {
-        const { MaDienThoai, SoLuongNhap, GiaNhapVao } = req.body;
-        const tongTien = parseInt(SoLuongNhap) * parseInt(GiaNhapVao);
-        // A. Lưu vào lịch sử phiếu nhập
-       const phieuMoi = new PhieuNhap({
-            MaDienThoai: MaDienThoai,
-            NhaCungCap: NhaCungCap,
-            SoLuongNhap: parseInt(SoLuongNhap),
-            GiaNhapVao: parseInt(GiaNhapVao),
-            TongTien: tongTien, // BỔ SUNG DÒNG NÀY VÀO ĐỂ LƯU VÀO DB
-            NgayNhap: new Date()
-        });
-        await phieuMoi.save();
+        const today = new Date();
+        const dd = String(today.getDate()).padStart(2, '0');
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const yy = String(today.getFullYear()).slice(-2);
+        const dateString = `${dd}${mm}${yy}`; 
 
-        // B. CẬP NHẬT NGƯỢC LẠI BẢNG ĐIỆN THOẠI
-        // Tìm cái điện thoại đó và cập nhật: Giá nhập mới + Cộng dồn số lượng tồn
-        await DienThoai.findByIdAndUpdate(MaDienThoai, {
-            $set: { GiaNhap: GiaNhapVao }, 
-            $inc: { SoLuongTon: SoLuongNhap } 
+        // Đếm theo MaPhieuNhap để tạo số thứ tự
+        const count = await PhieuNhap.countDocuments({
+            MaPhieuNhap: new RegExp(`^PN${dateString}`) 
         });
 
-        res.redirect('/dienthoai'); // Xong rồi thì về xem thành quả
+        const stt = String(count + 1).padStart(2, '0');
+        const maPhieuTuDong = `PN${dateString}-${stt}`; 
+
+        // Lấy danh sách ĐT để làm menu thả xuống
+        const danhSachDienThoai = await DienThoai.find();
+
+        res.render('phieunhap_them', { 
+            title: 'Lập phiếu nhập mới',
+            maPhieuTuDong: maPhieuTuDong,
+            dienthoai: danhSachDienThoai
+        });
     } catch (error) {
-        res.send("Lỗi nhập kho Sáng ơi: " + error.message);
+        next(error);
     }
 });
 
-// ĐOẠN NÀY LÀ BẮT BUỘC PHẢI CÓ ĐỂ XỬ LÝ LỖI CANNOT GET
+// ==========================================
+// 2. XỬ LÝ LƯU PHIẾU VÀO DATABASE KHI BẤM NÚT LƯU
+// ==========================================
+router.post('/them', async (req, res, next) => {
+    try {
+        const { MaPhieuNhap, MaDienThoai, TenDienThoai, SoLuongNhap, GiaNhapVao, NguoiNhap } = req.body;
+
+        const phieuMoi = new PhieuNhap({
+            MaPhieuNhap: MaPhieuNhap, // Lưu mã PN... vào đây
+            MaDienThoai: MaDienThoai, // Lưu ObjectId vào đây
+            TenDienThoai: TenDienThoai,
+            SoLuongNhap: Number(SoLuongNhap),
+            GiaNhapVao: Number(GiaNhapVao),
+            NguoiNhap: NguoiNhap
+        });
+
+        await phieuMoi.save();
+        res.redirect('/phieunhap');
+    } catch (error) {
+        next(error);
+    }
+});
+
+// ==========================================
+// 3. DANH SÁCH PHIẾU NHẬP
+// ==========================================
 router.get('/', async (req, res) => {
     try {
-        var dsPhieuNhap = await PhieuNhap.find(); 
+        var dsPhieuNhap = await PhieuNhap.find().sort({ NgayNhap: -1 }); // Sắp xếp phiếu mới nhất lên đầu
         res.render('phieunhap', { 
             title: 'Danh sách Phiếu nhập', 
             phieunhap: dsPhieuNhap, 

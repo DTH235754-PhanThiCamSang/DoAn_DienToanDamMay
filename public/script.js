@@ -1,292 +1,193 @@
-console.log("🚀 File script.js đã được tải thành công!");
-
-// Lấy dữ liệu từ thẻ script trung gian (Phải khớp với tên biến Sáng đặt trong EJS)
-const giaNhap = typeof SP_GIA_NHAP !== 'undefined' ? SP_GIA_NHAP : 0;
-const tenGoc = typeof SP_TEN_GOC !== 'undefined' ? SP_TEN_GOC : "";
-
 // ==========================================
-// 1. XỬ LÝ GẬP/MỞ MÔ TẢ
+// 1. XỬ LÝ BIẾN THỂ & TÍNH GIÁ (Ở TRANG CHI TIẾT)
 // ==========================================
-const btnToggle = document.getElementById('btnToggleDesc');
-if (btnToggle) {
-    btnToggle.addEventListener('click', function () {
-        const desc = document.getElementById('descriptionContent');
-        if (desc.classList.contains('description-collapsed')) {
-            desc.classList.replace('description-collapsed', 'description-expanded');
-            this.innerText = 'Thu gọn ▲';
-        } else {
-            desc.classList.replace('description-expanded', 'description-collapsed');
-            this.innerText = 'Xem thêm ▼';
-        }
-    });
-}
-
-// ==========================================
-// 2. XỬ LÝ BIẾN THỂ & TÍNH GIÁ
-// ==========================================
-const dataTag = document.getElementById('data-phienban');
-const cacPhienBan = dataTag ? JSON.parse(dataTag.textContent) : [];
-
-let selectedDungLuong = "";
-let selectedMauSac = "";
-let idPhienBanHienTai = "";
-
 function lamTronChuc(num) {
     return Math.round(num / 10) * 10;
 }
 
-if (cacPhienBan.length > 0) {
-    // Lấy giá trị mặc định từ các nút đang active
-    const activeDL = document.querySelector('#dungLuongGroup .variant-btn.btn-primary');
-    const activeMS = document.querySelector('#mauSacGroup .variant-btn.border-primary');
+// Hàm cập nhật giao diện khi chọn màu/dung lượng
+function updateProductUI() {
+    const dataTag = document.getElementById('data-phienban');
+    if (!dataTag) return;
     
-    if(activeDL) selectedDungLuong = activeDL.getAttribute('data-value').trim();
-    if(activeMS) selectedMauSac = activeMS.getAttribute('data-value').trim();
+    const cacPhienBan = JSON.parse(dataTag.textContent);
+    const selectedDungLuong = document.querySelector('#dungLuongGroup .btn-primary')?.getAttribute('data-value').trim();
+    const selectedMauSac = document.querySelector('#mauSacGroup .border-primary')?.getAttribute('data-value').trim();
 
-    function updateUI() {
-        const phienBan = cacPhienBan.find(pb =>
-            pb.DungLuong.trim() === selectedDungLuong && pb.MauSac.trim() === selectedMauSac
-        );
+    const phienBan = cacPhienBan.find(pb =>
+        pb.DungLuong.trim() === selectedDungLuong && pb.MauSac.trim() === selectedMauSac
+    );
 
-        const titleElement = document.getElementById('productTitle');
-        const priceElement = document.getElementById('hienThiGia');
-        const giaGocArea = document.getElementById('giaGocArea');
-        const btnMua = document.getElementById('btnMuaNgay');
-        const btnThem = document.getElementById('btnThemVaoGio');
+    const priceElement = document.getElementById('hienThiGia');
+    const btnMua = document.getElementById('btnMuaNgay');
+    const btnThem = document.getElementById('btnThemVaoGio');
 
-        if (phienBan) {
-            // Đổi tên và tính giá 
-            titleElement.innerText = `${tenGoc} ${selectedDungLuong} - ${selectedMauSac}`;
-            
-            let phanTramLoi = phienBan.PhanTramLoi || 0;
-            let giaNiemYet = lamTronChuc(giaNhap * (1 + phanTramLoi / 100));
-            let phanTramGiam = phienBan.PhanTramGiamGia || 0;
-            let giaCuoi = lamTronChuc(giaNiemYet * (1 - phanTramGiam / 100));
+    if (phienBan) {
+        // Cập nhật giá bán từ database (Không tính lại từ giá nhập để tránh sai số)
+        priceElement.innerText = Number(phienBan.GiaBan).toLocaleString('vi-VN') + ' VNĐ';
+        priceElement.className = "text-danger fw-bold my-3 fs-3";
 
-            priceElement.innerText = giaCuoi.toLocaleString('vi-VN') + ' VNĐ';
-            priceElement.className = "text-danger fw-bold my-3";
-
-            // KIỂM TRA SỐ LƯỢNG TỒN ĐỂ BẬT/TẮT NÚT
-            
-            let tonKho = phienBan.SoLuongTon || phienBan.SoLuong || 0;
-
-            if (tonKho > 0) {
-                // CÒN HÀNG: 
-                btnMua.disabled = false; 
-                btnMua.innerText = "MUA NGAY";
-                btnThem.disabled = false;
-                btnThem.innerHTML = '<i class="bi bi-cart-plus"></i> THÊM VÀO GIỎ HÀNG';
-                idPhienBanHienTai = phienBan._id;
-            } else {
-                // NẾU HẾT HÀNG (Số lượng <= 0): Đổi chữ, tắt nút
-                priceElement.innerText = 'Tạm hết hàng';
-                priceElement.className = "text-muted my-3";
-                
-                btnMua.disabled = true; 
-                btnMua.innerText = "HẾT HÀNG";
-                
-                btnThem.disabled = true;
-                btnThem.innerText = "HẾT HÀNG";
-                
-                idPhienBanHienTai = "";
-            }
+        let tonKho = parseInt(phienBan.SoLuongTon) || 0;
+        if (tonKho > 0) {
+            btnMua.disabled = false; btnMua.innerText = "MUA NGAY";
+            btnThem.disabled = false; btnThem.innerHTML = '<i class="bi bi-cart-plus"></i> THÊM VÀO GIỎ';
         } else {
-            // Trường hợp không tìm thấy phiên bản khớp
-            titleElement.innerText = tenGoc;
-            priceElement.innerText = 'Liên Hệ Đặt Hàng: 1900 1246';
-            btnMua.disabled = true;
-            btnThem.disabled = true;
-            idPhienBanHienTai = "";
+            priceElement.innerText = 'Tạm hết hàng';
+            btnMua.disabled = true; btnMua.innerText = "HẾT HÀNG";
+            btnThem.disabled = true; btnThem.innerText = "HẾT HÀNG";
         }
     }
-
-    document.querySelectorAll('.variant-btn').forEach(btn => {
-        btn.addEventListener('click', function () {
-            const type = this.getAttribute('data-type');
-            if (type === 'dungluong') {
-                document.querySelectorAll('#dungLuongGroup .variant-btn').forEach(b => b.classList.replace('btn-primary', 'btn-outline-primary'));
-                this.classList.replace('btn-outline-primary', 'btn-primary');
-                selectedDungLuong = this.getAttribute('data-value').trim();
-            } else {
-                document.querySelectorAll('#mauSacGroup .variant-btn').forEach(b => b.classList.remove('border-primary', 'border-2', 'fw-bold', 'text-primary'));
-                this.classList.add('border-primary', 'border-2', 'fw-bold', 'text-primary');
-                selectedMauSac = this.getAttribute('data-value').trim();
-            }
-            updateUI();
-        });
-    });
-    updateUI();
-}
-// Hàm tính lại tổng tiền dựa trên các sản phẩm được tích chọn
-function tinhLaiTongTien() {
-    let tong = 0;
-    // Tìm tất cả các ô checkbox đang ĐƯỢC TÍCH
-    const checkboxes = document.querySelectorAll('.chk-sanpham:checked');
-    
-    checkboxes.forEach(chk => {
-        const gia = parseInt(chk.dataset.gia) || 0;
-        const soLuong = parseInt(chk.dataset.soluong) || 0;
-        tong += gia * soLuong;
-    });
-
-    // Cập nhật con số hiển thị lên giao diện (Sáng nhớ kiểm tra ID của thẻ hiện tiền nhé)
-    const elementTongTien = document.getElementById('tong-tien-hien-thi');
-    const elementTamTinh = document.getElementById('tam-tinh-hien-thi');
-    
-    if (elementTongTien) elementTongTien.innerText = tong.toLocaleString('vi-VN') + 'đ';
-    if (elementTamTinh) elementTamTinh.innerText = tong.toLocaleString('vi-VN') + 'đ';
 }
 
-// Gán sự kiện Click cho tất cả các checkbox
-document.querySelectorAll('.chk-sanpham').forEach(chk => {
-    chk.addEventListener('change', tinhLaiTongTien);
+// Gán sự kiện chọn màu/dung lượng
+document.querySelectorAll('.variant-btn').forEach(btn => {
+    btn.addEventListener('click', function () {
+        const type = this.getAttribute('data-type');
+        if (type === 'dungluong') {
+            document.querySelectorAll('#dungLuongGroup .variant-btn').forEach(b => b.classList.replace('btn-primary', 'btn-outline-primary'));
+            this.classList.replace('btn-outline-primary', 'btn-primary');
+        } else {
+            document.querySelectorAll('#mauSacGroup .variant-btn').forEach(b => b.classList.remove('border-primary', 'border-2', 'fw-bold', 'text-primary'));
+            this.classList.add('border-primary', 'border-2', 'fw-bold', 'text-primary');
+        }
+        updateProductUI();
+    });
 });
-// ==========================================
-// 3. XỬ LÝ GIỎ HÀNG & MUA NGAY
-// ==========================================
-// public/script.js
 
-async function themVaoGioHang() {
-    // 1. Lấy ID sản phẩm
-    const idSanPham = document.getElementById('btnThemVaoGio').dataset.id;
-    
-    // 2. Lấy Dung lượng và Màu sắc đang được chọn (active)
-    const dungLuong = document.querySelector('#dungLuongGroup .btn-primary')?.innerText.trim();
-    const mauSac = document.querySelector('#mauSacGroup .border-primary')?.innerText.trim();
-    
-    // 3. Kiểm tra xem có đang bị báo "Tạm hết hàng" không
-    const textGia = document.getElementById('hienThiGia').innerText;
-    if (textGia.includes("Tạm hết hàng")) {
-        alert("Sản phẩm phiên bản này hiện đang hết hàng, vui lòng chọn mẫu khác!");
-        return;
-    }
+// ==========================================
+// 2. XỬ LÝ GIỎ HÀNG (AJAX - KHÔNG LOAD LẠI TRANG)
+// ==========================================
+
+// Hàm thêm vào giỏ
+async function themVaoGioHang(laMuaNgay = false) {
+    const btn = document.getElementById('btnThemVaoGio');
+    const idDT = btn.dataset.id;
+    const dungLuong = document.querySelector('#dungLuongGroup .btn-primary')?.getAttribute('data-value').trim();
+    const mauSac = document.querySelector('#mauSacGroup .border-primary')?.getAttribute('data-value').trim();
+    const tenDT = document.getElementById('productTitle').innerText.split('(')[0].trim();
+    const hinhAnh = document.getElementById('anhChinh').src;
+
+    // Tìm giá của phiên bản đang chọn
+    const dataTag = document.getElementById('data-phienban');
+    const cacPhienBan = JSON.parse(dataTag.textContent);
+    const phienBan = cacPhienBan.find(pb => pb.DungLuong === dungLuong && pb.MauSac === mauSac);
 
     try {
         const response = await fetch('/giohang/them', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
-                idSanPham: idSanPham, 
-                soLuong: 1, 
-                mauSac: mauSac, 
-                dungLuong: dungLuong 
+                idDT, TenDT: tenDT, DungLuong: dungLuong, MauSac: mauSac, 
+                GiaBan: phienBan.GiaBan, HinhAnh: hinhAnh 
             })
         });
 
         const data = await response.json();
-
         if (data.success) {
-            alert( data.message + " Thành Công.");
-            // Cập nhật số trên icon giỏ hàng nếu cần
-            if(document.getElementById('cart-count')) {
-                document.getElementById('cart-count').innerText = data.tongSoSP;
-            }
-            location.reload(); // Load lại để cập nhật màu sắc/giá mới nhất
-        } else {
-            alert("Lỗi: " + data.message);
+            document.getElementById('cart-badge').innerText = data.tongSoLuong;
+            if (laMuaNgay) window.location.href = '/giohang';
+            else alert("Đã thêm vào giỏ hàng thành công!");
         }
-    } catch (error) {
-        console.error("Lỗi:", error);
-        alert("Có lỗi kết nối, vui lòng thử lại sau!");
-    }
+    } catch (e) { alert("Lỗi kết nối giỏ hàng!"); }
 }
 
-// Đừng quên gán sự kiện cho nút bấm
-document.getElementById('btnThemVaoGio').addEventListener('click', themVaoGioHang);
-// ==========================================
-// 4. CÁC HÀM TẠI TRANG GIỎ HÀNG / THANH TOÁN
-// ==========================================
-
-// Thay đổi số lượng (Dùng cho cả Giỏ hàng và Thanh toán)
-function doiSoLuong(id, delta) {
-    // Sáng nên dùng link trực tiếp để khớp với Router đã viết
-    const prefix = window.location.pathname.includes('thanhtoan') ? '/thanhtoan' : '/giohang';
-    if (delta > 0) window.location.href = `${prefix}/tang/${id}`;
-    else window.location.href = `${prefix}/giam/${id}`;
-}
-
-// Xóa sản phẩm
-function xoaSP(id) {
-    if (confirm('Bạn muốn xóa sản phẩm này?')) {
-        const prefix = window.location.pathname.includes('thanhtoan') ? '/thanhtoan' : '/giohang';
-        window.location.href = `${prefix}/xoa/${id}`;
-    }
-}
-
-// Tính lại tiền khi tích chọn Checkbox (Trang giỏ hàng)
-const checkBoxes = document.querySelectorAll('.chk-sanpham');
-const hienThiTong = document.getElementById('tong-tien-hien-thi');
-
-if (checkBoxes.length > 0 && hienThiTong) {
-    checkBoxes.forEach(chk => {
-        chk.addEventListener('change', () => {
-            let tong = 0;
-            document.querySelectorAll('.chk-sanpham:checked').forEach(c => {
-                tong += parseInt(c.dataset.gia) * parseInt(c.dataset.soluong);
-            });
-            hienThiTong.innerText = tong.toLocaleString('vi-VN') + 'đ';
-        });
+// Hàm Cập nhật số lượng (Tăng/Giảm)
+function updateQty(idDT, dl, ms, action) {
+    fetch('/giohang/update-quantity', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idDT, dungluong: dl, mausac: ms, action })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) location.reload(); // Load lại để cập nhật tổng tiền chính xác
     });
 }
-// 1. Hàm tính toán và cập nhật tiền khi tích chọn
-function capNhatTongTien() {
-    let tong = 0;
-    // Tìm tất cả các ô checkbox đang ĐƯỢC TÍCH (checked)
-    const cacSanPhamDuocChon = document.querySelectorAll('.chk-sanpham:checked');
 
-    cacSanPhamDuocChon.forEach(checkbox => {
-        // Lấy giá và số lượng từ thuộc tính data- đã đặt ở EJS
-        const gia = parseInt(checkbox.dataset.gia) || 0;
-        const soLuong = parseInt(checkbox.dataset.soluong) || 0;
+// Hàm Xóa sản phẩm
+function removeItem(idDT, dl, ms) {
+    if(confirm('Sáng muốn xóa sản phẩm này khỏi giỏ?')) {
+        fetch('/giohang/remove-item', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ idDT, dungluong: dl, mausac: ms })
+        })
+        .then(res => res.json())
+        .then(data => { if (data.success) location.reload(); });
+    }
+}
+
+// ==========================================
+// 3. TÍNH TOÁN CHECKBOX & TỔNG TIỀN
+// ==========================================
+function tinhToanTongTien() {
+    let tong = 0;
+    document.querySelectorAll('.chk-sanpham:checked').forEach(chk => {
+        const gia = parseInt(chk.dataset.gia) || 0;
+        const soLuong = parseInt(chk.dataset.soluong) || 0;
         tong += gia * soLuong;
     });
-
-    // Định dạng lại tiền kiểu 1.000.000đ
-    const chuoiTien = tong.toLocaleString('vi-VN') + 'đ';
-
-    // Đẩy con số mới lên màn hình
-    const elTamTinh = document.getElementById('tam-tinh-hien-thi');
-    const elTongTien = document.getElementById('tong-tien-hien-thi');
-
-    if (elTamTinh) elTamTinh.innerText = chuoiTien;
-    if (elTongTien) elTongTien.innerText = chuoiTien;
+    
+    const elTong = document.getElementById('tong-tien-hien-thi');
+    if (elTong) elTong.innerText = tong.toLocaleString('vi-VN') + 'đ';
 }
 
-// 2. Lắng nghe sự kiện click vào các ô Checkbox
-document.querySelectorAll('.chk-sanpham').forEach(item => {
-    item.addEventListener('change', capNhatTongTien);
+// Gán sự kiện checkbox
+document.querySelectorAll('.chk-sanpham').forEach(chk => {
+    chk.addEventListener('change', tinhToanTongTien);
 });
 
-// 3. Xử lý nút "TIẾN HÀNH THANH TOÁN"
-// Chặn không cho đi tiếp nếu không chọn cái máy nào
+// Khởi chạy khi load trang
+document.addEventListener('DOMContentLoaded', () => {
+    updateProductUI();
+    tinhToanTongTien();
+});
+// // thanh toán trong khi tiến hành thanh toán
+// const nutThanhToan = document.querySelector('a[href="/thanhtoan"]');
+// if (nutThanhToan) {
+//     nutThanhToan.addEventListener('click', function(e) {
+//         e.preventDefault(); // Chặn việc nhảy trang mặc định
+        
+//         const cacSanPhamDuocChon = document.querySelectorAll('.chk-sanpham:checked');
+//         if (cacSanPhamDuocChon.length === 0) {
+//             alert("Vui lòng tích chọn ít nhất 1 sản phẩm để thanh toán!");
+//             return;
+//         }
+
+//         // Gom các ID và thông tin phiên bản (Dung lượng, Màu sắc) lại thành chuỗi
+//         let params = Array.from(cacSanPhamDuocChon).map(chk => {
+//             // Lấy dữ liệu từ hàng (row) tương ứng
+//             const row = chk.closest('.card-body');
+//             const id = chk.closest('.card').querySelector('button[onclick*="removeItem"]').getAttribute('onclick').match(/'([^']+)'/g);
+//             // id[0]: idDT, id[1]: DungLuong, id[2]: MauSac
+//             return `id=${id[0].replace(/'/g, "")}&dl=${id[1].replace(/'/g, "")}&ms=${id[2].replace(/'/g, "")}`;
+//         }).join('&');
+
+//         // Chuyển sang trang thanh toán kèm danh sách hàng đã chọn
+//         window.location.href = `/thanhtoan?${params}`;
+//     });
+// }
+// TRONG FILE SCRIPT.JS (Sửa đoạn redirect)
 const nutThanhToan = document.querySelector('a[href="/thanhtoan"]');
 if (nutThanhToan) {
     nutThanhToan.addEventListener('click', function(e) {
-        const soLuongChon = document.querySelectorAll('.chk-sanpham:checked').length;
-        if (soLuongChon === 0) {
-            e.preventDefault(); // Phanh trình duyệt lại, không cho nhảy sang trang thanhtoan
-            alert("Sáng ơi, vui lòng tích chọn ít nhất 1 sản phẩm để thanh toán nhé!");
-        }
-    });
-}
-// Xử lý nút MUA NGAY(trong chi)
-const btnMuaNgay = document.getElementById('btnMuaNgay');
-if (btnMuaNgay) {
-    btnMuaNgay.addEventListener('click', function() {
-        const idSanPham = this.dataset.id;
-        
-        // 1. Kiểm tra xem có đang bị "Tạm hết hàng" không
-        const textGia = document.getElementById('hienThiGia').innerText;
-        if (textGia.includes("Tạm hết hàng")) {
-            alert("❌ Sáng ơi, mẫu này hiện đang hết hàng rồi, chọn mẫu khác nhé!");
-            return;
-        }
+        e.preventDefault();
+        const cacSanPhamDuocChon = document.querySelectorAll('.chk-sanpham:checked');
+        if (cacSanPhamDuocChon.length === 0) return alert("Vui lòng chọn hàng!");
 
-        // 2. Lấy màu sắc và dung lượng khách đang chọn
-        const dungLuong = document.querySelector('#dungLuongGroup .btn-primary')?.innerText.trim();
-        const mauSac = document.querySelector('#mauSacGroup .border-primary')?.innerText.trim();
+        let params = Array.from(cacSanPhamDuocChon).map(chk => {
+            const row = chk.closest('.card-body');
+            const btnXoa = chk.closest('.card').querySelector('button[onclick*="removeItem"]');
+            const match = btnXoa.getAttribute('onclick').match(/'([^']+)'/g);
+            
+            // 🔥 Dùng encodeURIComponent để bảo vệ tên màu có dấu và dấu cách
+            const id = encodeURIComponent(match[0].replace(/'/g, ""));
+            const dl = encodeURIComponent(match[1].replace(/'/g, ""));
+            const ms = encodeURIComponent(match[2].replace(/'/g, ""));
+            
+            return `id=${id}&dl=${dl}&ms=${ms}`;
+        }).join('&');
 
-        // 3. Chuyển hướng đến trang thanh toán kèm thông tin màu/dung lượng (Dùng Query String)
-        window.location.href = `/thanhtoan/muangay/${idSanPham}?mauSac=${mauSac}&dungLuong=${dungLuong}`;
+        window.location.href = `/thanhtoan?${params}`;
     });
 }
